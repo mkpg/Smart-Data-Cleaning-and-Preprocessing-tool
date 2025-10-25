@@ -1,0 +1,7 @@
+patient_id,resourceType,id,patient_identifier_count,patient_name_count,gender,birthDate,patient_address_count,patient_telecom_count,clinicalStatus,verificationStatus,patient_code_coding_count,subject_reference,status,class_code,class_display,patient_reasonCode_count,period_start,period_end
+P001,Patient,P001,1.0,1.0,male,1991-02-23,1.0,1.0,,,,,,,,,,
+C001,Condition,C001,,,,,,,active,confirmed,1.0,Patient/P001,,,,,,
+E001,Encounter,E001,,,,,,,,,,,finished,AMB,Ambulatory,1.0,2025-09-10,2025-09-10
+P002,Patient,P002,1.0,1.0,female,1997-11-05,1.0,1.0,,,,,,,,,,
+C002,Condition,C002,,,,,,,active,confirmed,1.0,Patient/P002,,,,,,
+E002,Encounter,E002,,,,,,,,,,,finished,AMB,Ambulatory,1.0,2025-08-22,2025-08-22
