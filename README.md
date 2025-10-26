@@ -35,7 +35,9 @@ A powerful, dynamic Python application for cleaning and processing **both struct
 - **COVID-19 Analytics**: Specialized metrics (CFR, recovery rates, etc.)
 
 ## 🏗️ Architecture
+
 EnhancedDataCleaner/
+
 ├── Core Cleaning Engine
 │ ├── Data Type Intelligence (auto-conversion)
 │ ├── Feature Engineering (derived features)
