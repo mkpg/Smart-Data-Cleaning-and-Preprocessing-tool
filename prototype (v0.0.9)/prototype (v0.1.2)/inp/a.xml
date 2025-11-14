@@ -1,0 +1,235 @@
+<Patients>
+    <Patient>
+        <Name>Bobby Jackson</Name>
+        <Age>30</Age>
+        <Gender>Male</Gender>
+        <BloodType>B-</BloodType>
+        <MedicalCondition>Cancer</MedicalCondition>
+        <DateOfAdmission>31-01-2024</DateOfAdmission>
+        <Doctor>Matthew Smith</Doctor>
+        <Hospital>Sons and Miller</Hospital>
+        <InsuranceProvider>Blue Cross</InsuranceProvider>
+        <BillingAmount>18856.28131</BillingAmount>
+        <RoomNumber>328</RoomNumber>
+        <AdmissionType>Urgent</AdmissionType>
+        <DischargeDate>02-02-2024</DischargeDate>
+        <Medication>Paracetamol</Medication>
+        <TestResults>Normal</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Leslie Terry</Name>
+        <Age>62</Age>
+        <Gender>Male</Gender>
+        <BloodType>A+</BloodType>
+        <MedicalCondition>Obesity</MedicalCondition>
+        <DateOfAdmission>20-08-2019</DateOfAdmission>
+        <Doctor>Samantha Davies</Doctor>
+        <Hospital>Kim Inc</Hospital>
+        <InsuranceProvider>Medicare</InsuranceProvider>
+        <BillingAmount>33643.32729</BillingAmount>
+        <RoomNumber>265</RoomNumber>
+        <AdmissionType>Emergency</AdmissionType>
+        <DischargeDate>26-08-2019</DischargeDate>
+        <Medication>Ibuprofen</Medication>
+        <TestResults>Inconclusive</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Danny Smith</Name>
+        <Age>76</Age>
+        <Gender>Female</Gender>
+        <BloodType>A-</BloodType>
+        <MedicalCondition>Obesity</MedicalCondition>
+        <DateOfAdmission>22-09-2022</DateOfAdmission>
+        <Doctor>Tiffany Mitchell</Doctor>
+        <Hospital>Cook PLC</Hospital>
+        <InsuranceProvider>Aetna</InsuranceProvider>
+        <BillingAmount>27955.09608</BillingAmount>
+        <RoomNumber>205</RoomNumber>
+        <AdmissionType>Emergency</AdmissionType>
+        <DischargeDate>07-10-2022</DischargeDate>
+        <Medication>Aspirin</Medication>
+        <TestResults>Normal</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Andrew Watts</Name>
+        <Age>28</Age>
+        <Gender>Female</Gender>
+        <BloodType>O+</BloodType>
+        <MedicalCondition>Diabetes</MedicalCondition>
+        <DateOfAdmission>18-11-2020</DateOfAdmission>
+        <Doctor>Kevin Wells</Doctor>
+        <Hospital>Hernandez Rogers and Vang</Hospital>
+        <InsuranceProvider>Medicare</InsuranceProvider>
+        <BillingAmount>37909.78241</BillingAmount>
+        <RoomNumber>450</RoomNumber>
+        <AdmissionType>Elective</AdmissionType>
+        <DischargeDate>18-12-2020</DischargeDate>
+        <Medication>Ibuprofen</Medication>
+        <TestResults>Abnormal</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Adrienne Bell</Name>
+        <Age>43</Age>
+        <Gender>Female</Gender>
+        <BloodType>AB+</BloodType>
+        <MedicalCondition>Cancer</MedicalCondition>
+        <DateOfAdmission>19-09-2022</DateOfAdmission>
+        <Doctor>Kathleen Hanna</Doctor>
+        <Hospital>White-White</Hospital>
+        <InsuranceProvider>Aetna</InsuranceProvider>
+        <BillingAmount>14238.31781</BillingAmount>
+        <RoomNumber>458</RoomNumber>
+        <AdmissionType>Urgent</AdmissionType>
+        <DischargeDate>09-10-2022</DischargeDate>
+        <Medication>Penicillin</Medication>
+        <TestResults>Abnormal</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Emily Johnson</Name>
+        <Age>36</Age>
+        <Gender>Male</Gender>
+        <BloodType>A+</BloodType>
+        <MedicalCondition>Asthma</MedicalCondition>
+        <DateOfAdmission>20-12-2023</DateOfAdmission>
+        <Doctor>Taylor Newton</Doctor>
+        <Hospital>Nunez-Humphrey</Hospital>
+        <InsuranceProvider>UnitedHealthcare</InsuranceProvider>
+        <BillingAmount>48145.11095</BillingAmount>
+        <RoomNumber>389</RoomNumber>
+        <AdmissionType>Urgent</AdmissionType>
+        <DischargeDate>24-12-2023</DischargeDate>
+        <Medication>Ibuprofen</Medication>
+        <TestResults>Normal</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Edward Edwards</Name>
+        <Age>21</Age>
+        <Gender>Female</Gender>
+        <BloodType>AB-</BloodType>
+        <MedicalCondition>Diabetes</MedicalCondition>
+        <DateOfAdmission>03-11-2020</DateOfAdmission>
+        <Doctor>Kelly Olson</Doctor>
+        <Hospital>Group Middleton</Hospital>
+        <InsuranceProvider>Medicare</InsuranceProvider>
+        <BillingAmount>19580.87234</BillingAmount>
+        <RoomNumber>389</RoomNumber>
+        <AdmissionType>Emergency</AdmissionType>
+        <DischargeDate>15-11-2020</DischargeDate>
+        <Medication>Paracetamol</Medication>
+        <TestResults>Inconclusive</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Christina Martinez</Name>
+        <Age>20</Age>
+        <Gender>Female</Gender>
+        <BloodType>A+</BloodType>
+        <MedicalCondition>Cancer</MedicalCondition>
+        <DateOfAdmission>28-12-2021</DateOfAdmission>
+        <Doctor>Suzanne Thomas</Doctor>
+        <Hospital>Powell Robinson and Valdez</Hospital>
+        <InsuranceProvider>Cigna</InsuranceProvider>
+        <BillingAmount>45820.46272</BillingAmount>
+        <RoomNumber>277</RoomNumber>
+        <AdmissionType>Emergency</AdmissionType>
+        <DischargeDate>07-01-2022</DischargeDate>
+        <Medication>Paracetamol</Medication>
+        <TestResults>Inconclusive</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Jasmine Aguilar</Name>
+        <Age>82</Age>
+        <Gender>Male</Gender>
+        <BloodType>AB+</BloodType>
+        <MedicalCondition>Asthma</MedicalCondition>
+        <DateOfAdmission>01-07-2020</DateOfAdmission>
+        <Doctor>Daniel Ferguson</Doctor>
+        <Hospital>Sons Rich and</Hospital>
+        <InsuranceProvider>Cigna</InsuranceProvider>
+        <BillingAmount>50119.22279</BillingAmount>
+        <RoomNumber>316</RoomNumber>
+        <AdmissionType>Elective</AdmissionType>
+        <DischargeDate>14-07-2020</DischargeDate>
+        <Medication>Aspirin</Medication>
+        <TestResults>Abnormal</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Christopher Berg</Name>
+        <Age>58</Age>
+        <Gender>Female</Gender>
+        <BloodType>AB-</BloodType>
+        <MedicalCondition>Cancer</MedicalCondition>
+        <DateOfAdmission>23-05-2021</DateOfAdmission>
+        <Doctor>Heather Day</Doctor>
+        <Hospital>Padilla-Walker</Hospital>
+        <InsuranceProvider>UnitedHealthcare</InsuranceProvider>
+        <BillingAmount>19784.63106</BillingAmount>
+        <RoomNumber>249</RoomNumber>
+        <AdmissionType>Elective</AdmissionType>
+        <DischargeDate>22-06-2021</DischargeDate>
+        <Medication>Paracetamol</Medication>
+        <TestResults>Inconclusive</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Michelle Daniels</Name>
+        <Age>72</Age>
+        <Gender>Male</Gender>
+        <BloodType>O+</BloodType>
+        <MedicalCondition>Cancer</MedicalCondition>
+        <DateOfAdmission>19-04-2020</DateOfAdmission>
+        <Doctor>John Duncan</Doctor>
+        <Hospital>Schaefer-Porter</Hospital>
+        <InsuranceProvider>Medicare</InsuranceProvider>
+        <BillingAmount>12576.79561</BillingAmount>
+        <RoomNumber>394</RoomNumber>
+        <AdmissionType>Urgent</AdmissionType>
+        <DischargeDate>22-04-2020</DischargeDate>
+        <Medication>Paracetamol</Medication>
+        <TestResults>Normal</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Aaron Martinez</Name>
+        <Age>38</Age>
+        <Gender>Female</Gender>
+        <BloodType>A-</BloodType>
+        <MedicalCondition>Hypertension</MedicalCondition>
+        <DateOfAdmission>13-08-2023</DateOfAdmission>
+        <Doctor>Douglas Mayo</Doctor>
+        <Hospital>Lyons-Blair</Hospital>
+        <InsuranceProvider>Medicare</InsuranceProvider>
+        <BillingAmount>7999.58688</BillingAmount>
+        <RoomNumber>288</RoomNumber>
+        <AdmissionType>Urgent</AdmissionType>
+        <DischargeDate>05-09-2023</DischargeDate>
+        <Medication>Lipitor</Medication>
+        <TestResults>Inconclusive</TestResults>
+    </Patient>
+
+    <Patient>
+        <Name>Connor Hansen</Name>
+        <Age>75</Age>
+        <Gender>Female</Gender>
+        <BloodType>A+</BloodType>
+        <MedicalCondition>Diabetes</MedicalCondition>
+        <DateOfAdmission>12-12-2019</DateOfAdmission>
+        <Doctor>Kenneth Fletcher</Doctor>
+        <Hospital>Powers Miller and Flores</Hospital>
+        <InsuranceProvider>Cigna</InsuranceProvider>
+        <BillingAmount>43282.28336</BillingAmount>
+        <RoomNumber>134</RoomNumber>
+        <AdmissionType>Emergency</AdmissionType>
+        <DischargeDate>28-12-2019</DischargeDate>
+        <Medication>Penicillin</Medication>
+        <TestResults>Abnormal</TestResults>
+    </Patient>
+</Patients>
