@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Data Cleaner</title>
+    <meta name="description" content="Smart Data Cleaner — Enhanced structured data cleaning with 11 operations, YAML configuration, and healthcare compliance.">
+    <link rel="stylesheet" href="/static/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" charset="utf-8"></script>
+</head>
+
+<body>
+    <!-- Consent Modal (blocks access until accepted) -->
+    <div id="consent-modal" class="consent-modal">
+        <div class="consent-modal-content">
+            <div class="consent-modal-header-banner">⚠️ DATA USAGE CONSENT REQUIRED</div>
+
+            <div class="consent-modal-body">
+                <p class="consent-intro">BY USING THIS APPLICATION YOU ACKNOWLEDGE AND AGREE:</p>
+
+                <div class="consent-section">
+                    <div class="consent-section-icon">🔴</div>
+                    <div class="consent-section-body">
+                        <strong>YOUR SOLE RESPONSIBILITY</strong>
+                        <ul>
+                            <li>ALL data you upload, process, and use through this tool is <strong>YOUR SOLE
+                                    RESPONSIBILITY</strong>.</li>
+                            <li>You confirm that you have the legal right and authorization to use and process the
+                                uploaded data.</li>
+                            <li>You are fully responsible for ensuring compliance with all applicable data protection
+                                regulations (HIPAA, GDPR, DPDPA, etc.).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="consent-section">
+                    <div class="consent-section-icon">🔒</div>
+                    <div class="consent-section-body">
+                        <strong>NO BACKEND DATA STORAGE</strong>
+                        <ul>
+                            <li>This application does <strong>NOT</strong> store any of your data on any server, cloud,
+                                or backend system.</li>
+                            <li>ALL processing happens <strong>100% LOCALLY</strong> on your machine.</li>
+                            <li>No data is transmitted, collected, or retained by the developers or any third party —
+                                ever.</li>
+                            <li>Once you close the application, no trace of your data remains within the tool.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="consent-section">
+                    <div class="consent-section-icon">⚕️</div>
+                    <div class="consent-section-body">
+                        <strong>NOT A MEDICAL DEVICE</strong>
+                        <ul>
+                            <li>This tool is for <strong>DATA ANALYSIS and RESEARCH</strong> only.</li>
+                            <li>It must NOT be used for clinical decision-making, diagnosis, or treatment of patients.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="consent-section">
+                    <div class="consent-section-icon">🛡️</div>
+                    <div class="consent-section-body">
+                        <strong>PRIVACY NOTICE</strong>
+                        <ul>
+                            <li>PHI redaction features are provided on a <strong>BEST-EFFORT</strong> basis and do NOT
+                                guarantee complete de-identification.</li>
+                            <li>You must independently verify any output before sharing or publishing.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="consent-section">
+                    <div class="consent-section-icon">⚠️</div>
+                    <div class="consent-section-body">
+                        <strong>DISCLAIMER</strong>
+                        <ul>
+                            <li>This software is provided "AS IS" without warranty.</li>
+                            <li>The developers accept NO LIABILITY for data breaches, misuse, loss, or errors arising
+                                from use of this tool.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <label class="consent-modal-checkbox">
+                <input type="checkbox" id="consent-check">
+                <span>I have read and accept full responsibility for my data</span>
+            </label>
+
+            <div class="consent-btn-row">
+                <button id="consent-accept-btn" class="consent-accept-btn" disabled>✅ I Agree & Continue</button>
+                <button id="consent-decline-btn" class="consent-decline-btn">❌ Decline & Exit</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container hidden" id="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-icon">🔬</span>
+                <h1>Smart Data Cleaner</h1>
+            </div>
+            <div class="header-actions">
+                <a href="/docs" class="docs-link" target="_blank" title="View Documentation">
+                    <span class="docs-icon">📖</span> Docs
+                </a>
+                <span class="version-badge">Enhanced v0.0.7</span>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <nav class="tab-nav">
+            <button class="tab-btn active" data-tab="analysis">
+                <span class="tab-icon">🔍</span>
+                Data Analysis
+            </button>
+            <button class="tab-btn" data-tab="review">
+                <span class="tab-icon">⚙️</span>
+                Review & Adjust
+            </button>
+            <button class="tab-btn" data-tab="execute">
+                <span class="tab-icon">🚀</span>
+                Execute & Results
+            </button>
+            <button class="tab-btn" data-tab="visualize">
+                <span class="tab-icon">📊</span>
+                Visualize
+            </button>
+            <button class="tab-btn" data-tab="unstructured">
+                <span class="tab-icon">📝</span>
+                Unstructured
+            </button>
+        </nav>
+
+        <!-- Tab Content -->
+        <main class="tab-content">
+            <!-- Data Analysis Tab -->
+            <section id="analysis-tab" class="tab-panel active">
+                <!-- File Upload Section -->
+                <div class="upload-section">
+                    <label class="section-label">Select Dataset:</label>
+                    <div class="upload-controls">
+                        <div class="file-display">
+                            <span id="file-name">No file selected</span>
+                        </div>
+                        <label class="browse-btn">
+                            <input type="file" id="file-input" accept=".csv,.xlsx,.xls,.json,.xml,.txt,.log,.pdf,.md,.text,.dat,.rtf" hidden>
+                            Browse
+                        </label>
+                        <button id="analyze-btn" class="primary-btn" disabled>
+                            Load & Analyze
+                        </button>
+                        <button id="load-demo-btn" class="primary-btn" type="button">
+                            Try Demo Dataset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Drag & Drop Zone -->
+                <div id="dropzone" class="dropzone">
+                    <div class="dropzone-content">
+                        <span class="dropzone-icon">📁</span>
+                        <p>Drag & drop your CSV, Excel, JSON, XML, TXT, LOG, PDF, or MD file here</p>
+                        <span class="dropzone-hint">Structured, semi-structured, or unstructured — we handle them all</span>
+                    </div>
+                </div>
+
+                <!-- Analysis Results -->
+                <div class="results-section">
+                    <h2 class="section-title">Dataset Analysis Results</h2>
+
+                    <!-- Dataset Overview -->
+                    <div class="result-card">
+                        <div class="card-header">
+                            <span class="card-icon">📊</span>
+                            <h3>Dataset Overview:</h3>
+                        </div>
+                        <div id="overview-content" class="card-content">
+                            <div class="empty-state">
+                                Upload a dataset to see overview statistics
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Quality Issues -->
+                    <div class="result-card issues-card">
+                        <div class="card-header">
+                            <span class="card-icon">⚠️</span>
+                            <h3>Data Quality Issues:</h3>
+                        </div>
+                        <div id="issues-content" class="card-content">
+                            <div class="empty-state">
+                                Upload a dataset to detect quality issues
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Preview Table (Phase 3 Enhancement) -->
+                    <div class="result-card preview-card">
+                        <div class="card-header">
+                            <span class="card-icon">🔍</span>
+                            <h3>Interactive Data Preview:</h3>
+                        </div>
+                        <div id="data-preview-container" class="card-content">
+                            <div class="empty-state">
+                                Upload and analyze a dataset to see interactive preview
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="card-header">
+                            <span class="card-icon">🧭</span>
+                            <h3>AI Schema Mapping:</h3>
+                        </div>
+                        <div id="schema-mapping-container" class="card-content">
+                            <div class="empty-state">
+                                Upload and analyze data to get schema mapping suggestions
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Review & Adjust Tab -->
+            <section id="review-tab" class="tab-panel">
+                <!-- Strategy Selection -->
+                <div class="strategy-section">
+                    <h3 class="section-label">Cleaning Strategy</h3>
+                    <div class="strategy-controls">
+                        <label>Base Strategy:</label>
+                        <select id="strategy-select" class="strategy-dropdown">
+                            <option value="auto_smart">auto_smart</option>
+                            <option value="aggressive">aggressive</option>
+                            <option value="conservative">conservative</option>
+                            <option value="healthcare_specific">healthcare_specific</option>
+                            <option value="custom_yaml">custom_yaml</option>
+                        </select>
+                        <label class="yaml-upload-btn" id="yaml-upload-label">
+                            <input type="file" id="yaml-input" accept=".yaml,.yml" hidden>
+                            📁 Upload YAML
+                        </label>
+                        <span id="yaml-filename" class="yaml-filename"></span>
+                    </div>
+                </div>
+
+                <!-- Operations Section -->
+                <div class="operations-section">
+                    <h3 class="section-label">Adjust Cleaning Operations</h3>
+                    <div id="operations-container" class="operations-container">
+                        <!-- Operations will be dynamically inserted here -->
+                    </div>
+                </div>
+
+                <!-- YAML Info Panel (shown when custom_yaml is selected) -->
+                <div id="yaml-info-panel" class="yaml-info-panel hidden">
+                    <div class="info-header">
+                        <span class="info-icon">📋</span>
+                        <strong>YAML Configuration Reference</strong>
+                    </div>
+                    <div class="info-content">
+                        <p>Only the keys listed below are processed by this app. Any unsupported keys will be
+                            <strong>IGNORED</strong>.
+                        </p>
+
+                        <p class="yaml-section-header"><strong>═══ VALID OPERATIONS (set enabled: true/false)
+                                ═══</strong></p>
+                        <ul class="yaml-ops-list">
+                            <li>✅ <code>smart_type_conversion</code> — Auto detect & convert data types
+                                <em>[methods: auto, conservative, aggressive]</em>
+                            </li>
+                            <li>✅ <code>handle_missing</code> — Handle missing/null values <em>[methods: auto, remove,
+                                    fill_median, fill_mode]</em></li>
+                            <li>✅ <code>remove_duplicates</code> — Remove duplicate rows</li>
+                            <li>✅ <code>feature_engineering</code> — Create derived features (date/text/numeric)</li>
+                            <li>✅ <code>clean_text</code> — Clean text formatting (whitespace, title case)</li>
+                            <li>✅ <code>handle_outliers</code> — Handle outliers <em>[methods: cap, remove,
+                                    ignore]</em></li>
+                            <li>✅ <code>remove_high_missing</code> — Remove columns >50% missing ⚠️</li>
+                            <li>✅ <code>redact_phi</code> — Redact Protected Health Information ⚠️</li>
+                            <li>✅ <code>validate_clinical</code> — Validate clinical measurement ranges</li>
+                            <li>✅ <code>standardize_codes</code> — Standardize medical codes (ICD/CPT)</li>
+                            <li>✅ <code>validate_ranges</code> — Validate numeric value ranges (3×IQR clip)</li>
+                        </ul>
+
+                        <p class="yaml-section-header"><strong>═══ SAMPLE YAML ═══</strong></p>
+                        <pre class="yaml-example">operations:
+  smart_type_conversion:
+    description: "Convert data types"
+    enabled: true
+    methods: [auto, conservative, aggressive]
+    default_method: "auto"
+  handle_missing:
+    description: "Handle missing values"
+    enabled: true
+    methods: [auto, remove, fill_median, fill_mode]
+    default_method: "auto"
+  remove_duplicates:
+    description: "Remove duplicates"
+    enabled: true
+  clean_text:
+    description: "Clean text formatting"
+    enabled: true
+  handle_outliers:
+    description: "Handle outliers"
+    enabled: true
+    methods: [cap, remove, ignore]
+    default_method: "cap"
+  validate_ranges:
+    description: "Validate numeric ranges"
+    enabled: true</pre>
+                        <p class="yaml-hint">⚠️ Click "Upload YAML" above to load your config.</p>
+                    </div>
+                </div>
+
+                <!-- Operations Summary -->
+                <div class="summary-section">
+                    <div class="summary-header">
+                        <span class="summary-icon">🔧</span>
+                        <h3>OPERATIONS TO BE PERFORMED:</h3>
+                    </div>
+                    <div id="operations-summary" class="operations-summary">
+                        <div class="summary-content">
+                            <p><strong>Strategy:</strong> <span id="summary-strategy">Auto Smart</span></p>
+                            <p><strong>Enabled Operations:</strong></p>
+                            <ul id="summary-operations">
+                                <li>No operations selected</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Execute & Results Tab -->
+            <section id="execute-tab" class="tab-panel">
+                <!-- Final Operations Summary -->
+                <div class="final-summary-section">
+                    <h3 class="section-label">Final Operations Summary</h3>
+                    <div id="final-summary" class="final-summary-box">
+                        <div class="summary-header-line">
+                            <span>🔧</span>
+                            <span>OPERATIONS TO BE PERFORMED:</span>
+                        </div>
+                        <div class="summary-divider"></div>
+                        <div id="final-summary-content">
+                            <p>Strategy: <span id="final-strategy">Auto Smart</span></p>
+                            <p>Enabled Operations:</p>
+                            <ul id="final-operations-list">
+                                <li>No operations configured</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="execute-btn-container">
+                        <button id="execute-btn" class="execute-btn" disabled>
+                            ⚡ EXECUTE WITH ADJUSTMENTS
+                        </button>
+                        <span id="execute-status" class="execute-status"></span>
+                    </div>
+                    <div id="execution-progress" class="execution-progress hidden"></div>
+                </div>
+
+                <!-- Cleaning Results -->
+                <div class="cleaning-results-section hidden" id="results-section">
+                    <h3 class="section-label">📊 Cleaning Results</h3>
+                    <div class="results-box">
+                        <div class="results-header">
+                            <span>📋</span>
+                            <span>CLEANING RESULTS:</span>
+                        </div>
+                        <div class="results-divider"></div>
+
+                        <!-- Data Comparison -->
+                        <div class="data-comparison">
+                            <div class="comparison-row">
+                                <span class="comparison-label">Original Data:</span>
+                                <span id="original-stats" class="comparison-value">—</span>
+                            </div>
+                            <div class="comparison-row">
+                                <span class="comparison-label">Cleaned Data:</span>
+                                <span id="cleaned-stats" class="comparison-value">—</span>
+                            </div>
+                            <div class="comparison-row highlight">
+                                <span class="comparison-label">Data Reduction:</span>
+                                <span id="data-reduction" class="comparison-value">—</span>
+                            </div>
+                        </div>
+
+                        <!-- Operations Performed -->
+                        <div class="ops-performed-section">
+                            <div class="ops-header">
+                                <span>🔧</span>
+                                <span>OPERATIONS PERFORMED:</span>
+                            </div>
+                            <ul id="ops-performed-list" class="ops-list">
+                                <!-- Will be populated dynamically -->
+                            </ul>
+                        </div>
+
+                        <!-- Data Quality Improvement -->
+                        <div class="quality-improvement-section">
+                            <div class="quality-header">
+                                <span>📈</span>
+                                <span>DATA QUALITY IMPROVEMENT:</span>
+                            </div>
+                            <div id="quality-metrics" class="quality-metrics">
+                                <!-- Metrics will be populated dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Accuracy Comparison -->
+                        <div class="accuracy-section">
+                            <div class="accuracy-header">
+                                <span>🎯</span>
+                                <span>ACCURACY COMPARISON:</span>
+                            </div>
+                            <div id="accuracy-metrics" class="accuracy-metrics">
+                                <div class="accuracy-row">
+                                    <span class="accuracy-label">Data Completeness:</span>
+                                    <div class="accuracy-bars">
+                                        <div class="accuracy-bar-group">
+                                            <span class="bar-label">Before:</span>
+                                            <div class="progress-bar">
+                                                <div id="completeness-before" class="progress-fill before"
+                                                    style="width: 0%"></div>
+                                            </div>
+                                            <span id="completeness-before-val" class="bar-value">0%</span>
+                                        </div>
+                                        <div class="accuracy-bar-group">
+                                            <span class="bar-label">After:</span>
+                                            <div class="progress-bar">
+                                                <div id="completeness-after" class="progress-fill after"
+                                                    style="width: 0%"></div>
+                                            </div>
+                                            <span id="completeness-after-val" class="bar-value">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accuracy-row">
+                                    <span class="accuracy-label">Data Consistency:</span>
+                                    <div class="accuracy-bars">
+                                        <div class="accuracy-bar-group">
+                                            <span class="bar-label">Before:</span>
+                                            <div class="progress-bar">
+                                                <div id="consistency-before" class="progress-fill before"
+                                                    style="width: 0%"></div>
+                                            </div>
+                                            <span id="consistency-before-val" class="bar-value">0%</span>
+                                        </div>
+                                        <div class="accuracy-bar-group">
+                                            <span class="bar-label">After:</span>
+                                            <div class="progress-bar">
+                                                <div id="consistency-after" class="progress-fill after"
+                                                    style="width: 0%"></div>
+                                            </div>
+                                            <span id="consistency-after-val" class="bar-value">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="accuracy-row">
+                                    <span class="accuracy-label">Overall Quality Score:</span>
+                                    <div class="accuracy-bars">
+                                        <div class="accuracy-bar-group">
+                                            <span class="bar-label">Before:</span>
+                                            <div class="progress-bar">
+                                                <div id="quality-before" class="progress-fill before" style="width: 0%">
+                                                </div>
+                                            </div>
+                                            <span id="quality-before-val" class="bar-value">0%</span>
+                                        </div>
+                                        <div class="accuracy-bar-group">
+                                            <span class="bar-label">After:</span>
+                                            <div class="progress-bar">
+                                                <div id="quality-after" class="progress-fill after" style="width: 0%">
+                                                </div>
+                                            </div>
+                                            <span id="quality-after-val" class="bar-value">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Validation Report -->
+                    <div class="result-card" id="validation-report-card" style="display:none; margin-top: 20px;">
+                        <div class="card-header">
+                            <span class="card-icon">📋</span>
+                            <h3>Validation Report</h3>
+                        </div>
+                        <div id="validation-report-content" class="card-content">
+                        </div>
+                    </div>
+
+                    <!-- Export Buttons -->
+                    <div class="export-section">
+                        <button id="export-data-btn" class="export-btn">
+                            📥 Export Cleaned Data
+                        </button>
+                        <button id="export-report-btn" class="export-btn secondary">
+                            📄 Export Cleaning Report
+                        </button>
+                        <button id="export-lineage-btn" class="export-btn secondary">
+                            🧾 Export Lineage Report
+                        </button>
+                    </div>
+
+                    <div class="result-card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <span class="card-icon">🪞</span>
+                            <h3>Comparison Mode:</h3>
+                        </div>
+                        <div id="comparison-mode-container" class="card-content">
+                            <div class="empty-state">Execute cleaning to view before/after comparison.</div>
+                        </div>
+                    </div>
+
+                    <div class="result-card" style="margin-top: 20px;">
+                        <div class="card-header">
+                            <span class="card-icon">📜</span>
+                            <h3>Data Lineage:</h3>
+                        </div>
+                        <div id="lineage-container" class="card-content">
+                            <div class="empty-state">Execute cleaning to generate lineage trace.</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Visualize Tab -->
+            <section id="visualize-tab" class="tab-panel">
+                <div class="viz-container">
+                    <!-- Left Panel: Fields -->
+                    <div class="viz-sidebar">
+                        <div class="viz-source-toggle">
+                            <label class="viz-label">Data Source:</label>
+                            <select id="viz-source" class="viz-select">
+                                <option value="original">Original Dataset</option>
+                                <option value="cleaned" selected>Cleaned Dataset</option>
+                            </select>
+                            <div id="viz-row-count" class="viz-row-count"></div>
+                        </div>
+
+                        <div class="viz-field-panel">
+                            <div class="viz-field-header">
+                                <span>📋</span> <strong>Fields</strong>
+                            </div>
+                            <div id="viz-field-list" class="viz-field-list">
+                                <div class="viz-empty">Upload & clean a dataset first</div>
+                            </div>
+                        </div>
+
+                        <!-- Chart Config -->
+                        <div class="viz-config-panel">
+                            <div class="viz-field-header">
+                                <span>⚙️</span> <strong>Chart Config</strong>
+                            </div>
+                            <div class="viz-config-row">
+                                <label>Chart Type:</label>
+                                <select id="viz-chart-type" class="viz-select">
+                                    <option value="bar">📊 Bar Chart</option>
+                                    <option value="scatter">🔵 Scatter Plot</option>
+                                    <option value="line">📈 Line Chart</option>
+                                    <option value="histogram">📶 Histogram</option>
+                                    <option value="box">📦 Box Plot</option>
+                                    <option value="pie">🥧 Pie Chart</option>
+                                    <option value="heatmap">🔥 Correlation Heatmap</option>
+                                    <option value="violin">🎻 Violin Plot</option>
+                                </select>
+                            </div>
+                            <div class="viz-config-row">
+                                <label>X-Axis:</label>
+                                <select id="viz-x-axis" class="viz-select">
+                                    <option value="">— Select column —</option>
+                                </select>
+                            </div>
+                            <div class="viz-config-row">
+                                <label>Y-Axis:</label>
+                                <select id="viz-y-axis" class="viz-select">
+                                    <option value="">— Select column —</option>
+                                </select>
+                            </div>
+                            <div class="viz-config-row">
+                                <label>Color / Group:</label>
+                                <select id="viz-color" class="viz-select">
+                                    <option value="">— None —</option>
+                                </select>
+                            </div>
+                            <div class="viz-config-row">
+                                <label>Aggregation:</label>
+                                <select id="viz-agg" class="viz-select">
+                                    <option value="none">None (raw values)</option>
+                                    <option value="count">Count</option>
+                                    <option value="sum">Sum</option>
+                                    <option value="mean" selected>Mean (Average)</option>
+                                    <option value="median">Median</option>
+                                    <option value="min">Min</option>
+                                    <option value="max">Max</option>
+                                </select>
+                            </div>
+                            <button id="viz-add-chart" class="viz-add-btn">➕ Add Chart to Dashboard</button>
+                        </div>
+
+                        <!-- Active Filters -->
+                        <div class="viz-filter-panel">
+                            <div class="viz-field-header">
+                                <span>🔍</span> <strong>Active Filters</strong>
+                            </div>
+                            <div id="viz-active-filters" class="viz-filter-list">
+                                <div class="viz-empty">Click a chart element to cross-filter</div>
+                            </div>
+                            <button id="viz-clear-filters" class="viz-clear-btn" style="display:none">✕ Clear All Filters</button>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Dashboard -->
+                    <div class="viz-dashboard">
+                        <div class="viz-dashboard-header">
+                            <h3>📊 Interactive Dashboard</h3>
+                            <div class="viz-dashboard-actions">
+                                <button id="viz-clear-dashboard" class="viz-action-btn">🗑️ Clear All</button>
+                            </div>
+                        </div>
+                        <div id="viz-charts-grid" class="viz-charts-grid">
+                            <div class="viz-empty-dashboard">
+                                <span class="viz-empty-icon">📊</span>
+                                <p>Configure a chart on the left and click <strong>"Add Chart"</strong> to start building your dashboard</p>
+                                <p class="viz-empty-hint">💡 Click on any chart element to cross-filter all other charts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Unstructured Data Tab -->
+            <section id="unstructured-tab" class="tab-panel">
+                <div class="unstruct-container">
+                    <!-- Upload Section -->
+                    <div class="unstruct-upload-section">
+                        <h3 class="section-label">📝 Unstructured Data Cleaning & Preprocessing</h3>
+                        <p class="unstruct-subtitle">Upload healthcare text files (TXT, LOG, PDF, MD) for cleaning, preprocessing, PHI redaction, and text-based extraction.</p>
+                        <div class="unstruct-upload-controls">
+                            <div class="file-display">
+                                <span id="unstruct-file-name">No file selected</span>
+                            </div>
+                            <label class="browse-btn">
+                                <input type="file" id="unstruct-file-input" accept=".txt,.log,.pdf,.md,.text,.dat,.rtf" hidden>
+                                Browse
+                            </label>
+                            <button id="unstruct-analyze-btn" class="primary-btn" disabled>
+                                Process File
+                            </button>
+                        </div>
+                        <div id="unstruct-dropzone" class="dropzone">
+                            <div class="dropzone-content">
+                                <span class="dropzone-icon">📄</span>
+                                <p>Drag & drop TXT, LOG, PDF, or MD files here</p>
+                                <span class="dropzone-hint">Healthcare clinical notes, EHR logs, trial protocols</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Demo Buttons -->
+                    <div class="unstruct-demo-section">
+                        <span class="demo-label">Try demo:</span>
+                        <button class="unstruct-demo-btn" data-demo="txt">📋 Medical Notes (.txt)</button>
+                        <button class="unstruct-demo-btn" data-demo="log">📜 EHR System Log (.log)</button>
+                        <button class="unstruct-demo-btn" data-demo="md">📑 Clinical Trial (.md)</button>
+                    </div>
+
+                    <!-- Processing Options -->
+                    <div class="unstruct-options-section">
+                        <div class="unstruct-options-header">
+                            <span class="card-icon">⚙️</span>
+                            <h3>Processing Options</h3>
+                            <button id="unstruct-toggle-options" class="unstruct-toggle-btn">▼</button>
+                        </div>
+                        <div id="unstruct-options-panel" class="unstruct-options-panel">
+                            <div class="unstruct-options-grid">
+                                <!-- Cleaning Ops -->
+                                <div class="unstruct-opt-group">
+                                    <h4>🧹 Text Cleaning</h4>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-normalize-whitespace" checked> Normalize Whitespace</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-normalize-linebreaks" checked> Normalize Line Breaks</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-remove-control" checked> Remove Control Characters</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-fix-encoding" checked> Fix Encoding Artifacts</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-normalize-unicode" checked> Normalize Unicode</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-standardize-punct" checked> Standardize Punctuation</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-remove-empty" checked> Remove Empty Lines</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-fix-hyphenation" checked> Fix Hyphenation</label>
+                                </div>
+                                <!-- PHI & Compliance -->
+                                <div class="unstruct-opt-group">
+                                    <h4>🛡️ Privacy & Compliance</h4>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-redact-phi" checked> Redact PHI (HIPAA)</label>
+                                    <div class="unstruct-select-row">
+                                        <label>Redaction Style:</label>
+                                        <select id="opt-redaction-style" class="unstruct-select">
+                                            <option value="tag">[REDACTED-TYPE] Tags</option>
+                                            <option value="hash">Pseudonymized Hash</option>
+                                            <option value="mask">Character Masking (***)</option>
+                                            <option value="remove">Complete Removal</option>
+                                        </select>
+                                    </div>
+                                    <div class="compliance-badges">
+                                        <span class="compliance-badge hipaa">HIPAA</span>
+                                        <span class="compliance-badge gdpr">GDPR</span>
+                                        <span class="compliance-badge dpdp">DPDP</span>
+                                    </div>
+                                </div>
+                                <!-- Medical Processing -->
+                                <div class="unstruct-opt-group">
+                                    <h4>⚕️ Medical Processing</h4>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-expand-abbrev" checked> Expand Medical Abbreviations</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-spell-correct" checked> Correct Medical Spelling</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-extract-clinical" checked> Extract Clinical Values</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-extract-sections" checked> Extract Document Sections</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-extract-entities" checked> Extract Medical Entities (Regex NER)</label>
+                                    <label class="unstruct-checkbox"><input type="checkbox" id="opt-parse-logs" checked> Parse Log Entries (.log)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="unstruct-results" class="unstruct-results hidden">
+                        <!-- Stats Overview -->
+                        <div class="result-card">
+                            <div class="card-header">
+                                <span class="card-icon">📊</span>
+                                <h3>Processing Summary</h3>
+                            </div>
+                            <div id="unstruct-stats" class="card-content">
+                            </div>
+                        </div>
+
+                        <!-- PHI Findings -->
+                        <div class="result-card issues-card">
+                            <div class="card-header">
+                                <span class="card-icon">🛡️</span>
+                                <h3>PHI / PII Detection & Redaction</h3>
+                            </div>
+                            <div id="unstruct-phi-results" class="card-content">
+                            </div>
+                        </div>
+
+                        <!-- Before/After Text Preview -->
+                        <div class="result-card">
+                            <div class="card-header">
+                                <span class="card-icon">🪞</span>
+                                <h3>Before / After Comparison</h3>
+                            </div>
+                            <div class="unstruct-comparison">
+                                <div class="unstruct-text-panel">
+                                    <h4>Original Text</h4>
+                                    <pre id="unstruct-original-preview" class="unstruct-text-preview"></pre>
+                                </div>
+                                <div class="unstruct-text-panel">
+                                    <h4>Cleaned & Redacted Text</h4>
+                                    <pre id="unstruct-cleaned-preview" class="unstruct-text-preview"></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Clinical Values -->
+                        <div class="result-card">
+                            <div class="card-header">
+                                <span class="card-icon">🩺</span>
+                                <h3>Extracted Clinical Values</h3>
+                            </div>
+                            <div id="unstruct-clinical-values" class="card-content">
+                            </div>
+                        </div>
+
+                        <!-- Document Sections -->
+                        <div class="result-card">
+                            <div class="card-header">
+                                <span class="card-icon">📑</span>
+                                <h3>Document Sections</h3>
+                            </div>
+                            <div id="unstruct-sections" class="card-content">
+                            </div>
+                        </div>
+
+                        <!-- Log Entries (for .log files) -->
+                        <div id="unstruct-log-section" class="result-card hidden">
+                            <div class="card-header">
+                                <span class="card-icon">📜</span>
+                                <h3>Parsed Log Entries</h3>
+                            </div>
+                            <div id="unstruct-log-entries" class="card-content">
+                            </div>
+                        </div>
+
+                        <!-- Reviewer Queue Summary (Phase 6 polish) -->
+                        <div id="unstruct-review-section" class="result-card hidden">
+                            <div class="card-header">
+                                <span class="card-icon">👩‍⚕️</span>
+                                <h3>Reviewer Queue Summary</h3>
+                            </div>
+                            <div id="unstruct-review-summary" class="card-content">
+                            </div>
+                        </div>
+
+                        <!-- Abbreviation Expansions -->
+                        <div class="result-card">
+                            <div class="card-header">
+                                <span class="card-icon">📖</span>
+                                <h3>Medical Abbreviation Expansions</h3>
+                            </div>
+                            <div id="unstruct-abbreviations" class="card-content">
+                            </div>
+                        </div>
+
+                        <!-- Spell Corrections -->
+                        <div class="result-card">
+                            <div class="card-header">
+                                <span class="card-icon">📝</span>
+                                <h3>Medical Spell Corrections</h3>
+                            </div>
+                            <div id="unstruct-spell-report" class="card-content">
+                            </div>
+                        </div>
+
+                        <!-- Medical Entities -->
+                        <div class="result-card">
+                            <div class="card-header">
+                                <span class="card-icon">🧬</span>
+                                <h3>Extracted Medical Entities</h3>
+                            </div>
+                            <div id="unstruct-entities" class="card-content">
+                            </div>
+                        </div>
+
+                        <!-- Export -->
+                        <div class="export-section">
+                            <button id="unstruct-export-btn" class="export-btn">
+                                📥 Export Cleaned Text
+                            </button>
+                            <button id="unstruct-export-json-btn" class="export-btn secondary">
+                                📥 Export Extracted Data (JSON)
+                            </button>
+                        </div>
+
+                        <!-- Processing Log -->
+                        <div class="result-card">
+                            <div class="card-header">
+                                <span class="card-icon">📋</span>
+                                <h3>Processing Log</h3>
+                            </div>
+                            <div id="unstruct-processing-log" class="card-content">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-spinner"></div>
+        <p>Analyzing dataset...</p>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/preview.js"></script>
+    <script src="/static/app.js"></script>
+    <script src="/static/visualize.js"></script>
+    <script src="/static/unstructured.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,201 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: smart-data-cleaner
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: smart-data-cleaner
+data:
+  FLASK_ENV: "production"
+  LOG_LEVEL: "INFO"
+  MAX_FILE_SIZE_MB: "100"
+  SESSION_LIFETIME_HOURS: "24"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secrets
+  namespace: smart-data-cleaner
+type: Opaque
+stringData:
+  SECRET_KEY: "your-production-secret-key"
+  DATABASE_URL: "postgresql://user:password@postgres:5432/smartdatacleaner"
+  REDIS_URL: "redis://redis:6379/0"
+  SENTRY_DSN: "https://your-sentry-dsn"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: smart-data-cleaner
+  namespace: smart-data-cleaner
+  labels:
+    app: smart-data-cleaner
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: smart-data-cleaner
+  template:
+    metadata:
+      labels:
+        app: smart-data-cleaner
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5000"
+    spec:
+      serviceAccountName: smart-data-cleaner
+      containers:
+      - name: app
+        image: ghcr.io/your-org/smart-data-cleaner:latest
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 5000
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 5000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 2
+        volumeMounts:
+        - name: uploads
+          mountPath: /app/uploads
+      volumes:
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: uploads-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: uploads-pvc
+  namespace: smart-data-cleaner
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: smart-data-cleaner
+  namespace: smart-data-cleaner
+  labels:
+    app: smart-data-cleaner
+spec:
+  type: ClusterIP
+  selector:
+    app: smart-data-cleaner
+  ports:
+  - name: http
+    port: 80
+    targetPort: 5000
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: smart-data-cleaner-hpa
+  namespace: smart-data-cleaner
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: smart-data-cleaner
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: smart-data-cleaner-pdb
+  namespace: smart-data-cleaner
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: smart-data-cleaner
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: smart-data-cleaner
+  namespace: smart-data-cleaner
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: smart-data-cleaner
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: smart-data-cleaner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: smart-data-cleaner
+subjects:
+- kind: ServiceAccount
+  name: smart-data-cleaner
+  namespace: smart-data-cleaner

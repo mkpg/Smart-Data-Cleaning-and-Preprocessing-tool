@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicl Documentation | Smart Data Preprocessing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #050505;
+            --bg-sidebar: #0A0A0A;
+            --bg-card: #121214;
+            --accent-primary: #6366f1;
+            --accent-secondary: #d946ef;
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --code-bg: #1e1e20;
+            --sidebar-width: 280px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: var(--sidebar-width);
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #6366f1, #d946ef);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 3rem;
+            display: block;
+            text-decoration: none;
+        }
+
+        .nav-group {
+            margin-bottom: 2rem;
+        }
+
+        .nav-group-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-link.active {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 4rem 8rem 8rem;
+            max-width: 1200px;
+        }
+
+        section {
+            padding-top: 4rem;
+            margin-bottom: 4rem;
+        }
+
+        h1 { font-size: 3rem; font-weight: 800; margin-bottom: 2rem; letter-spacing: -0.02em; }
+        h2 { font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem; margin-top: 3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+        h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; margin-top: 2rem; color: #818cf8; }
+
+        p { margin-bottom: 1.25rem; color: var(--text-secondary); }
+
+        .tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #e4e4e7;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 1rem; top: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: rgba(20, 20, 20, 0.5);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.02);
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Callouts */
+        .callout {
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-primary);
+            background: rgba(99, 102, 241, 0.05);
+            margin: 2rem 0;
+        }
+
+        .callout.warning {
+            border-left-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.05);
+        }
+
+        .callout-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        /* Operation Cards */
+        .ops-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .op-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 16px;
+            transition: transform 0.2s;
+        }
+
+        .op-card:hover { border-color: var(--accent-primary); transform: translateY(-4px); }
+        .op-icon { font-size: 1.5rem; margin-bottom: 1rem; display: block; }
+        .op-title { font-weight: 700; margin-bottom: 0.5rem; display: block; }
+        .op-desc { font-size: 0.85rem; color: var(--text-secondary); }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-content { margin-left: 0; padding: 2rem; }
+            .sidebar { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <a href="/" class="sidebar-logo">Medicl.</a>
+        
+        <nav>
+            <div class="nav-group">
+                <div class="nav-group-title">User Guide</div>
+                <a href="#getting-started" class="nav-link">Getting Started</a>
+                <a href="#interface" class="nav-link">Interface Overview</a>
+                <a href="#operations" class="nav-link">Cleaning Operations</a>
+                <a href="#strategies" class="nav-link">Execution Strategies</a>
+            </div>
+            
+            <div class="nav-group">
+                <div class="nav-group-title">API Reference</div>
+                <a href="#api-auth" class="nav-link">Authentication</a>
+                <a href="#api-upload" class="nav-link">Upload Endpoint</a>
+                <a href="#api-execute" class="nav-link">Execute Endpoint</a>
+                <a href="#api-export" class="nav-link">Export Endpoint</a>
+            </div>
+
+            <div class="nav-group">
+                <div class="nav-group-title">Other</div>
+                <a href="#faq" class="nav-link">FAQ</a>
+                <a href="/app" class="nav-link" style="color: var(--accent-primary)">Open App →</a>
+            </div>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <header>
+            <span class="tag">Release v0.0.7</span>
+            <h1>Knowledge Base</h1>
+            <p>Master the Medicl platform with our comprehensive guides for researchers, data scientists, and developers.</p>
+        </header>
+
+        <section id="getting-started">
+            <h2>Getting Started</h2>
+            <p>Medicl is an advanced healthcare-centric data preprocessing platform designed to handle structured, semi-structured, and unstructured medical records with intelligent parsing and HIPAA-compliant redaction.</p>
+            
+            <h3>Installation</h3>
+            <p>Run Medicl locally using Docker or standard Python environments.</p>
+            
+            <div class="callout">
+                <div class="callout-title">Docker (Recommended)</div>
+                <p>The easiest way to get started is using Docker Compose.</p>
+                <pre><button class="copy-btn">Copy</button><code>docker-compose up -d
+# Open http://localhost:5000</code></pre>
+            </div>
+
+            <div class="callout" style="border-left-color: var(--accent-secondary); background: rgba(217, 70, 239, 0.05);">
+                <div class="callout-title">Local Python Setup</div>
+                <p>Ensure you have Python 3.10+ installed.</p>
+                <pre><button class="copy-btn">Copy</button><code>pip install -r requirements.txt
+python server.py</code></pre>
+            </div>
+        </section>
+
+        <section id="interface">
+            <h2>Interface Overview</h2>
+            <p>The Web UI is divided into three functional phases to guide you through the data cleaning process.</p>
+            
+            <div class="ops-grid">
+                <div class="op-card">
+                    <span class="op-icon">🔍</span>
+                    <span class="op-title">Data Analysis</span>
+                    <p class="op-desc">Upload your dataset and get an immediate AI-powered quality report, missing value heatmaps, and schema mapping suggestions.</p>
+                </div>
+                <div class="op-card">
+                    <span class="op-icon">⚙️</span>
+                    <span class="op-title">Review & Adjust</span>
+                    <p class="op-desc">Fine-tune exactly which cleaning operations to perform. Toggle HIPAA redaction, outlier clipping, and medical code standardization.</p>
+                </div>
+                <div class="op-card">
+                    <span class="op-icon">🚀</span>
+                    <span class="op-title">Execute & Export</span>
+                    <p class="op-desc">Run the pipeline and view side-by-side "Before/After" metrics. Export your cleaned data in CSV, XLSX, JSON, or Parquet.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="operations">
+            <h2>Cleaning Operations</h2>
+            <p>Medicl provides 11 specialized operations tailored for medical and technical data cleaning.</p>
+            
+            <div class="ops-grid">
+                <div class="op-card">
+                    <span class="op-title">Smart Type Conversion</span>
+                    <p class="op-desc">Auto-detects intended data types and fixes type mismatches in columns.</p>
+                </div>
+                <div class="op-card">
+                    <span class="op-title">PHI Redaction</span>
+                    <p class="op-desc">Redacts names, phones, IDs, and emails to ensure HIPAA/GDPR compliance.</p>
+                </div>
+                <div class="op-card">
+                    <span class="op-title">ICD-10 Mapping</span>
+                    <p class="op-desc">Aligns clinical diagnoses with standard ICD-10 registry codes using fuzzy matching.</p>
+                </div>
+                <div class="op-card">
+                    <span class="op-title">Outlier Handling</span>
+                    <p class="op-desc">Detects and handles anomalous values using Z-score or IQR methods.</p>
+                </div>
+            </div>
+
+            <div class="callout warning">
+                <div class="callout-title">PHI Redaction Notice</div>
+                <p>While Medicl's PHI redaction is robust, it is provided on a best-effort basis. Always independently verify output before sharing sensitive clinical data.</p>
+            </div>
+        </section>
+
+        <section id="api-reference">
+            <h1>API Reference</h1>
+            <p>Our RESTful API allows you to integrate Medicl's cleaning pipeline into your own clinical workflows and applications.</p>
+
+            <h3 id="api-auth">Authentication & Sessions</h3>
+            <p>The API uses session-based tracking. A session is automatically created upon your first valid file upload.</p>
+            
+            <h3 id="api-upload">Upload Endpoint</h3>
+            <pre><button class="copy-btn">Copy</button><code>POST /api/upload
+Content-Type: multipart/form-data</code></pre>
+            
+            <h4>Python Example</h4>
+            <pre><button class="copy-btn">Copy</button><code>import requests
+
+files = {'file': open('patient_records.csv', 'rb')}
+r = requests.post('http://localhost:5000/api/upload', files=files)
+session_id = r.json()['session_id']</code></pre>
+
+            <h3 id="api-execute">Execute Endpoint</h3>
+            <pre><button class="copy-btn">Copy</button><code>POST /api/execute
+Content-Type: application/json</code></pre>
+
+            <h4>Example Payload</h4>
+            <pre><button class="copy-btn">Copy</button><code>{
+  "session_id": "uuid-here",
+  "operations": {
+    "redact_phi": { "checked": true },
+    "remove_duplicates": { "checked": true },
+    "smart_type_conversion": { "checked": true }
+  }
+}</code></pre>
+
+            <h3 id="api-export">Export Endpoint</h3>
+            <p>Retrieve the cleaned data once processing is complete.</p>
+            <pre><button class="copy-btn">Copy</button><code>GET /api/export/{session_id}?format=csv</code></pre>
+        </section>
+
+        <section id="faq">
+            <h2>Frequently Asked Questions</h2>
+            <table>
+                <tr>
+                    <th>Question</th>
+                    <th>Answer</th>
+                </tr>
+                <tr>
+                    <td>Is my data stored on a server?</td>
+                    <td>No. Medicl processes data 100% locally in-memory. Once the session ends, data is purged.</td>
+                </tr>
+                <tr>
+                    <td>What is the maximum file size?</td>
+                    <td>The default limit is 50MB, but this can be adjusted in the <code>server.py</code> config.</td>
+                </tr>
+                <tr>
+                    <td>Do you support PDF clinical notes?</td>
+                    <td>Yes, via the "Unstructured" tab, which uses Docling and OCR to parse clinical text.</td>
+                </tr>
+            </table>
+        </section>
+
+        <footer style="margin-top: 8rem; border-top: 1px solid var(--border-color); padding-top: 2rem; color: var(--text-muted); font-size: 0.85rem;">
+            &copy; 2026 Medicl Healthcare AI Platform. All rights reserved.
+        </footer>
+    </main>
+
+    <script>
+        // Simple scroll spy logic
+        const links = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('section');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            links.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Copy button logic
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const code = btn.nextElementSibling.innerText;
+                navigator.clipboard.writeText(code);
+                btn.innerText = 'Copied!';
+                setTimeout(() => btn.innerText = 'Copy', 2000);
+            });
+        });
+    </aside>
+</body>
+</html>

@@ -1,0 +1,1232 @@
+[
+  {
+    "entry_id": "LOG-0001",
+    "timestamp": "2025-01-10 08:15:32",
+    "timestamp_iso": "2025-01-10T08:15:32",
+    "level": "INFO",
+    "source": "EMR-SYSTEM",
+    "event_type": "patient_check_in",
+    "message": "Patient check-in initiated | MRN: 123456789 | Name: John Doe | DOB: 1965-03-15",
+    "summary": "Patient check-in initiated",
+    "fields": {
+      "mrn": "123456789",
+      "name": "John Doe",
+      "dob": "1965-03-15"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 1,
+    "parse_confidence": 0.91,
+    "review_history": [
+      {
+        "entry_id": "LOG-0001",
+        "reviewer_name": "QA Reviewer",
+        "timestamp": "2026-03-13T02:49:09.179836",
+        "decision": "approved",
+        "modified_payload": null,
+        "notes": "Verified in Phase 6 smoke test",
+        "confidence_override": null
+      }
+    ]
+  },
+  {
+    "entry_id": "LOG-0002",
+    "timestamp": "2025-01-10 08:15:33",
+    "timestamp_iso": "2025-01-10T08:15:33",
+    "level": "INFO",
+    "source": "EMR-SYSTEM",
+    "event_type": "emr_system",
+    "message": "Insurance verified | Policy: BCBS-IL-9876543 | Group: GRP-44521",
+    "summary": "Insurance verified",
+    "fields": {
+      "policy": "BCBS-IL-9876543",
+      "group": "GRP-44521"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": [
+        "44521"
+      ]
+    },
+    "line_number": 2,
+    "parse_confidence": 0.89,
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0003",
+    "timestamp": "2025-01-10 08:16:01",
+    "timestamp_iso": "2025-01-10T08:16:01",
+    "level": "INFO",
+    "source": "TRIAGE",
+    "event_type": "vitals_capture",
+    "message": "Vitals recorded | BP: 165/95 | HR: 102 | RR: 22 | Temp: 98.6F | SpO2: 94%",
+    "summary": "Vitals recorded",
+    "fields": {
+      "bp": "165/95",
+      "hr": "102",
+      "rr": "22",
+      "temp": "98.6F",
+      "spo2": "94%"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {
+      "blood_pressure": {
+        "systolic": 165,
+        "diastolic": 95
+      },
+      "heart_rate": 102,
+      "respiratory_rate": 22,
+      "temperature": 98.6,
+      "oxygen_saturation": 94
+    },
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 3,
+    "parse_confidence": 0.99,
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0004",
+    "timestamp": "2025-01-10 08:16:15",
+    "timestamp_iso": "2025-01-10T08:16:15",
+    "level": "WARN",
+    "source": "TRIAGE",
+    "event_type": "triage",
+    "message": "CRITICAL - SpO2 below 95% threshold | Patient: John Doe | MRN: 123456789",
+    "summary": "CRITICAL - SpO2 below 95% threshold",
+    "fields": {
+      "patient": "John Doe",
+      "mrn": "123456789"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 4,
+    "parse_confidence": 0.89,
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0005",
+    "timestamp": "2025-01-10 08:16:20",
+    "timestamp_iso": "2025-01-10T08:16:20",
+    "level": "WARN",
+    "source": "TRIAGE",
+    "event_type": "triage",
+    "message": "CRITICAL - BP systolic above 160 threshold | Patient: John Doe",
+    "summary": "CRITICAL - BP systolic above 160 threshold",
+    "fields": {
+      "patient": "John Doe"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 5,
+    "parse_confidence": 0.87,
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0006",
+    "timestamp": "2025-01-10 08:17:00",
+    "timestamp_iso": "2025-01-10T08:17:00",
+    "level": "INFO",
+    "source": "TRIAGE",
+    "event_type": "triage",
+    "message": "Pain assessment | Location: chest, substernal | Severity: 8/10 | Onset: 2hrs ago",
+    "summary": "Pain assessment",
+    "fields": {
+      "location": "chest, substernal",
+      "severity": "8/10",
+      "onset": "2hrs ago"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 6,
+    "parse_confidence": 0.91,
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0007",
+    "timestamp": "2025-01-10 08:17:30",
+    "timestamp_iso": "2025-01-10T08:17:30",
+    "level": "INFO",
+    "source": "EMR-SYSTEM",
+    "event_type": "triage_priority",
+    "message": "Triage priority assigned: LEVEL-2 (Emergency) | MRN: 123456789",
+    "summary": "Triage priority assigned: LEVEL-2 (Emergency)",
+    "fields": {
+      "triage_priority_assigned": "LEVEL-2 (Emergency)",
+      "mrn": "123456789"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 7,
+    "parse_confidence": 0.89,
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0008",
+    "timestamp": "2025-01-10 08:18:00",
+    "timestamp_iso": "2025-01-10T08:18:00",
+    "level": "INFO",
+    "source": "LAB-ORDER",
+    "event_type": "lab_order",
+    "message": "STAT orders placed | Troponin, BNP, CBC, BMP | Provider: Dr. Sarah Johnson | NPI: 1234567890",
+    "summary": "STAT orders placed",
+    "fields": {
+      "provider": "Dr. Sarah Johnson",
+      "npi": "1234567890"
+    },
+    "normalized_payload": {
+      "order_set": "STAT orders placed",
+      "priority": "stat",
+      "ordered_tests": [
+        "Troponin",
+        "BNP",
+        "CBC",
+        "BMP"
+      ],
+      "ordering_provider": "Dr. Sarah Johnson"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 8,
+    "parse_confidence": 0.97,
+    "normalization_confidence": 100.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 100.0,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0009",
+    "timestamp": "2025-01-10 08:18:05",
+    "timestamp_iso": "2025-01-10T08:18:05",
+    "level": "INFO",
+    "source": "PHARMACY",
+    "event_type": "medication_event",
+    "message": "Medication reconciliation started | Patient SSN: ***-**-9012",
+    "summary": "Medication reconciliation started",
+    "fields": {
+      "patient_ssn": "***-**-9012"
+    },
+    "normalized_payload": {
+      "action": "reconciliation_started"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 9,
+    "parse_confidence": 0.89,
+    "normalization_confidence": 48.3,
+    "review_needed": true,
+    "review_status": "pending_review",
+    "confidence_components": {
+      "required_fields": 50.0,
+      "payload_completeness": 16.7,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0010",
+    "timestamp": "2025-01-10 08:20:00",
+    "timestamp_iso": "2025-01-10T08:20:00",
+    "level": "INFO",
+    "source": "RADIOLOGY",
+    "event_type": "imaging_order",
+    "message": "Chest X-ray ordered | Priority: STAT | MRN: 123456789",
+    "summary": "Chest X-ray ordered",
+    "fields": {
+      "priority": "STAT",
+      "mrn": "123456789"
+    },
+    "normalized_payload": {
+      "modality": "Chest X-ray",
+      "priority": "stat"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 10,
+    "parse_confidence": 0.93,
+    "normalization_confidence": 91.7,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 66.7,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0011",
+    "timestamp": "2025-01-10 08:25:00",
+    "timestamp_iso": "2025-01-10T08:25:00",
+    "level": "INFO",
+    "source": "EMR-SYSTEM",
+    "event_type": "procedure_event",
+    "message": "12-lead ECG completed | Interpretation: ST depression in leads V3-V6",
+    "summary": "12-lead ECG completed",
+    "fields": {
+      "interpretation": "ST depression in leads V3-V6"
+    },
+    "normalized_payload": {
+      "procedure_name": "12-lead ECG",
+      "status": "completed"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 11,
+    "parse_confidence": 0.91,
+    "normalization_confidence": 80.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 33.3,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0012",
+    "timestamp": "2025-01-10 08:30:00",
+    "timestamp_iso": "2025-01-10T08:30:00",
+    "level": "INFO",
+    "source": "LAB-RESULT",
+    "event_type": "lab_result",
+    "message": "Troponin I: 2.4 ng/mL [H] | Reference: <0.04 ng/mL | MRN: 123456789",
+    "summary": "Troponin I: 2.4 ng/mL [H]",
+    "fields": {
+      "troponin_i": "2.4 ng/mL [H]",
+      "reference": "<0.04 ng/mL",
+      "mrn": "123456789"
+    },
+    "normalized_payload": {
+      "test_name": "Troponin I",
+      "value": 2.4,
+      "unit": "ng/mL",
+      "abnormal_flag": "H",
+      "reference_range": "<0.04 ng/mL"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 12,
+    "parse_confidence": 0.99,
+    "normalization_confidence": 95.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 83.3,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0013",
+    "timestamp": "2025-01-10 08:30:05",
+    "timestamp_iso": "2025-01-10T08:30:05",
+    "level": "ALERT",
+    "source": "LAB-RESULT",
+    "event_type": "lab_result",
+    "message": "CRITICAL VALUE - Troponin elevated | Notifying attending physician",
+    "summary": "CRITICAL VALUE - Troponin elevated",
+    "fields": {},
+    "normalized_payload": {
+      "criticality": "critical",
+      "test_name": "Troponin",
+      "status": "alerted"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 13,
+    "parse_confidence": 0.91,
+    "normalization_confidence": 44.7,
+    "review_needed": true,
+    "review_status": "pending_review",
+    "confidence_components": {
+      "required_fields": 33.3,
+      "payload_completeness": 33.3,
+      "extraction_quality": 90
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0014",
+    "timestamp": "2025-01-10 08:31:00",
+    "timestamp_iso": "2025-01-10T08:31:00",
+    "level": "INFO",
+    "source": "LAB-RESULT",
+    "event_type": "lab_result",
+    "message": "BNP: 450 pg/mL [H] | Reference: <100 pg/mL",
+    "summary": "BNP: 450 pg/mL [H]",
+    "fields": {
+      "bnp": "450 pg/mL [H]",
+      "reference": "<100 pg/mL"
+    },
+    "normalized_payload": {
+      "test_name": "BNP",
+      "value": 450,
+      "unit": "pg/mL",
+      "abnormal_flag": "H",
+      "reference_range": "<100 pg/mL"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 14,
+    "parse_confidence": 0.99,
+    "normalization_confidence": 95.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 83.3,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0015",
+    "timestamp": "2025-01-10 08:31:30",
+    "timestamp_iso": "2025-01-10T08:31:30",
+    "level": "INFO",
+    "source": "LAB-RESULT",
+    "event_type": "lab_result",
+    "message": "Glucose: 245 mg/dL [H] | Reference: 70-100 mg/dL",
+    "summary": "Glucose: 245 mg/dL [H]",
+    "fields": {
+      "glucose": "245 mg/dL [H]",
+      "reference": "70-100 mg/dL"
+    },
+    "normalized_payload": {
+      "test_name": "Glucose",
+      "value": 245,
+      "unit": "mg/dL",
+      "abnormal_flag": "H",
+      "reference_range": "70-100 mg/dL"
+    },
+    "clinical_snapshot": {
+      "glucose": 245
+    },
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 15,
+    "parse_confidence": 0.99,
+    "normalization_confidence": 95.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 83.3,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0016",
+    "timestamp": "2025-01-10 08:32:00",
+    "timestamp_iso": "2025-01-10T08:32:00",
+    "level": "INFO",
+    "source": "CONSULT",
+    "event_type": "consult",
+    "message": "Cardiology consult requested | Reason: NSTEMI | Dr. Johnson -> Dr. Patel",
+    "summary": "Cardiology consult requested",
+    "fields": {
+      "reason": "NSTEMI"
+    },
+    "normalized_payload": {
+      "specialty": "Cardiology",
+      "status": "requested",
+      "reason": "NSTEMI"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 16,
+    "parse_confidence": 0.93,
+    "normalization_confidence": 88.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 60.0,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0017",
+    "timestamp": "2025-01-10 08:35:00",
+    "timestamp_iso": "2025-01-10T08:35:00",
+    "level": "INFO",
+    "source": "PHARMACY",
+    "event_type": "medication_event",
+    "message": "Heparin drip initiated | 18 units/kg/hr | Weight: 95kg | MRN: 123456789",
+    "summary": "Heparin drip initiated",
+    "fields": {
+      "weight": "95kg",
+      "mrn": "123456789"
+    },
+    "normalized_payload": {
+      "action": "initiated",
+      "medication_name": "Heparin",
+      "route": "intravenous",
+      "administration_mode": "continuous_infusion",
+      "infusion_rate": 18,
+      "infusion_rate_unit": "units/kg/hr",
+      "weight_kg": 95.0
+    },
+    "clinical_snapshot": {
+      "weight": 95
+    },
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 17,
+    "parse_confidence": 0.99,
+    "normalization_confidence": 88.3,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 66.7,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0018",
+    "timestamp": "2025-01-10 08:35:30",
+    "timestamp_iso": "2025-01-10T08:35:30",
+    "level": "INFO",
+    "source": "PHARMACY",
+    "event_type": "medication_event",
+    "message": "Aspirin 325mg PO administered | Patient: John Doe",
+    "summary": "Aspirin 325mg PO administered",
+    "fields": {
+      "patient": "John Doe"
+    },
+    "normalized_payload": {
+      "action": "administered",
+      "medication_name": "Aspirin",
+      "dose": 325,
+      "dose_unit": "mg",
+      "route": "oral"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 18,
+    "parse_confidence": 0.97,
+    "normalization_confidence": 88.3,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 66.7,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0019",
+    "timestamp": "2025-01-10 08:36:00",
+    "timestamp_iso": "2025-01-10T08:36:00",
+    "level": "INFO",
+    "source": "PHARMACY",
+    "event_type": "medication_event",
+    "message": "Clopidogrel 300mg PO loading dose | Patient: John Doe",
+    "summary": "Clopidogrel 300mg PO loading dose",
+    "fields": {
+      "patient": "John Doe"
+    },
+    "normalized_payload": {
+      "action": "loading_dose",
+      "medication_name": "Clopidogrel",
+      "dose": 300,
+      "dose_unit": "mg",
+      "route": "oral"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 19,
+    "parse_confidence": 0.97,
+    "normalization_confidence": 88.3,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 66.7,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0020",
+    "timestamp": "2025-01-10 08:40:00",
+    "timestamp_iso": "2025-01-10T08:40:00",
+    "level": "INFO",
+    "source": "RADIOLOGY",
+    "event_type": "imaging_result",
+    "message": "Chest X-ray resulted | Findings: Mild cardiomegaly, no acute infiltrates",
+    "summary": "Chest X-ray resulted",
+    "fields": {
+      "findings": "Mild cardiomegaly, no acute infiltrates"
+    },
+    "normalized_payload": {
+      "modality": "Chest X-ray",
+      "findings": "Mild cardiomegaly, no acute infiltrates",
+      "impression": "Mild cardiomegaly, no acute infiltrates"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 20,
+    "parse_confidence": 0.93,
+    "normalization_confidence": 100.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 100.0,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0021",
+    "timestamp": "2025-01-10 09:00:00",
+    "timestamp_iso": "2025-01-10T09:00:00",
+    "level": "INFO",
+    "source": "CONSULT",
+    "event_type": "consult",
+    "message": "Cardiology accepted | Dr. Raj Patel | Plan: Cardiac catheterization tomorrow AM",
+    "summary": "Cardiology accepted",
+    "fields": {
+      "plan": "Cardiac catheterization tomorrow AM"
+    },
+    "normalized_payload": {
+      "status": "accepted",
+      "plan": ": Cardiac catheterization tomorrow AM"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 21,
+    "parse_confidence": 0.91,
+    "normalization_confidence": 57.0,
+    "review_needed": true,
+    "review_status": "pending_review",
+    "confidence_components": {
+      "required_fields": 50.0,
+      "payload_completeness": 40.0,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0022",
+    "timestamp": "2025-01-10 09:15:00",
+    "timestamp_iso": "2025-01-10T09:15:00",
+    "level": "INFO",
+    "source": "NURSING",
+    "event_type": "nursing_note",
+    "message": "Patient assessment | Alert, oriented x4 | Pain 6/10 improving | O2 2L NC -> SpO2 97%",
+    "summary": "Patient assessment",
+    "fields": {},
+    "normalized_payload": {
+      "event_subtype": "assessment",
+      "mental_status": "alert_oriented_x4",
+      "pain_level": 6,
+      "oxygen_saturation": 97
+    },
+    "clinical_snapshot": {
+      "oxygen_saturation": 97
+    },
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 22,
+    "parse_confidence": 0.98,
+    "normalization_confidence": 83.5,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 60.0,
+      "extraction_quality": 90
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0023",
+    "timestamp": "2025-01-10 10:00:00",
+    "timestamp_iso": "2025-01-10T10:00:00",
+    "level": "INFO",
+    "source": "EMR-SYSTEM",
+    "event_type": "emr_system",
+    "message": "Admission order placed | Unit: CCU | Room: 4-312 | Attending: Dr. Johnson",
+    "summary": "Admission order placed",
+    "fields": {
+      "unit": "CCU",
+      "room": "4-312",
+      "attending": "Dr. Johnson"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 23,
+    "parse_confidence": 0.91,
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0024",
+    "timestamp": "2025-01-10 10:05:00",
+    "timestamp_iso": "2025-01-10T10:05:00",
+    "level": "INFO",
+    "source": "PHARMACY",
+    "event_type": "medication_event",
+    "message": "Insulin sliding scale ordered | Glucose monitoring q4h",
+    "summary": "Insulin sliding scale ordered",
+    "fields": {},
+    "normalized_payload": {
+      "action": "ordered",
+      "medication_name": "Insulin",
+      "regimen": "sliding_scale",
+      "monitoring_frequency": "every_4_hours"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 24,
+    "parse_confidence": 0.93,
+    "normalization_confidence": 74.7,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 33.3,
+      "extraction_quality": 90
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0025",
+    "timestamp": "2025-01-10 12:00:00",
+    "timestamp_iso": "2025-01-10T12:00:00",
+    "level": "INFO",
+    "source": "NURSING",
+    "event_type": "nursing_note",
+    "message": "Pain reassessment | 4/10 | Vitals: BP 142/88 HR 88 RR 18 SpO2 97%",
+    "summary": "Pain reassessment",
+    "fields": {
+      "vitals": "BP 142/88 HR 88 RR 18 SpO2 97%"
+    },
+    "normalized_payload": {
+      "event_subtype": "assessment",
+      "bp": "142/88",
+      "heart_rate": 88,
+      "respiratory_rate": 18,
+      "oxygen_saturation": 97
+    },
+    "clinical_snapshot": {
+      "blood_pressure": {
+        "systolic": 142,
+        "diastolic": 88
+      },
+      "heart_rate": 88,
+      "respiratory_rate": 18,
+      "oxygen_saturation": 97
+    },
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 25,
+    "parse_confidence": 0.99,
+    "normalization_confidence": 72.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 20.0,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0026",
+    "timestamp": "2025-01-10 14:00:00",
+    "timestamp_iso": "2025-01-10T14:00:00",
+    "level": "INFO",
+    "source": "LAB-RESULT",
+    "event_type": "lab_result",
+    "message": "HbA1c: 8.2% [H] | Reference: <5.7% | Indicates poor glycemic control",
+    "summary": "HbA1c: 8.2% [H]",
+    "fields": {
+      "hba1c": "8.2% [H]",
+      "reference": "<5.7%"
+    },
+    "normalized_payload": {
+      "test_name": "HbA1c",
+      "value": 8.2,
+      "unit": "%",
+      "abnormal_flag": "H",
+      "reference_range": "<5.7%"
+    },
+    "clinical_snapshot": {
+      "hba1c": 8.2
+    },
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 26,
+    "parse_confidence": 0.99,
+    "normalization_confidence": 95.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 83.3,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0027",
+    "timestamp": "2025-01-10 16:00:00",
+    "timestamp_iso": "2025-01-10T16:00:00",
+    "level": "INFO",
+    "source": "CONSULT",
+    "event_type": "consult",
+    "message": "Endocrinology consult requested | Reason: Uncontrolled DM2, HbA1c 8.2%",
+    "summary": "Endocrinology consult requested",
+    "fields": {
+      "reason": "Uncontrolled DM2, HbA1c 8.2%"
+    },
+    "normalized_payload": {
+      "specialty": "Endocrinology",
+      "status": "requested",
+      "reason": "Uncontrolled DM2, HbA1c 8.2%"
+    },
+    "clinical_snapshot": {
+      "hba1c": 8.2
+    },
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 27,
+    "parse_confidence": 0.98,
+    "normalization_confidence": 88.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 60.0,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0028",
+    "timestamp": "2025-01-10 18:00:00",
+    "timestamp_iso": "2025-01-10T18:00:00",
+    "level": "INFO",
+    "source": "NURSING",
+    "event_type": "nursing_note",
+    "message": "Evening assessment | Patient resting comfortably | CP resolved | Diet: cardiac/diabetic",
+    "summary": "Evening assessment",
+    "fields": {
+      "diet": "cardiac/diabetic"
+    },
+    "normalized_payload": {
+      "event_subtype": "assessment",
+      "diet": "cardiac/diabetic"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 28,
+    "parse_confidence": 0.91,
+    "normalization_confidence": 72.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 20.0,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0029",
+    "timestamp": "2025-01-11 06:00:00",
+    "timestamp_iso": "2025-01-11T06:00:00",
+    "level": "INFO",
+    "source": "LAB-ORDER",
+    "event_type": "lab_order",
+    "message": "Pre-cath labs | PT/INR, aPTT, BMP, Troponin | MRN: 123456789",
+    "summary": "Pre-cath labs",
+    "fields": {
+      "mrn": "123456789"
+    },
+    "normalized_payload": {
+      "order_set": "Pre-cath labs",
+      "priority": "routine",
+      "ordered_tests": [
+        "PT/INR",
+        "aPTT",
+        "BMP",
+        "Troponin"
+      ]
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 29,
+    "parse_confidence": 0.93,
+    "normalization_confidence": 93.8,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 75.0,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0030",
+    "timestamp": "2025-01-11 07:00:00",
+    "timestamp_iso": "2025-01-11T07:00:00",
+    "level": "INFO",
+    "source": "LAB-RESULT",
+    "event_type": "lab_result",
+    "message": "Troponin trending down: 1.8 ng/mL | Previous: 2.4",
+    "summary": "Troponin trending down: 1.8 ng/mL",
+    "fields": {
+      "troponin_trending_down": "1.8 ng/mL",
+      "previous": "2.4"
+    },
+    "normalized_payload": {
+      "test_name": "Troponin",
+      "value": 1.8,
+      "unit": "ng/mL",
+      "trend": "down",
+      "previous_value": "2.4"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 30,
+    "parse_confidence": 0.99,
+    "normalization_confidence": 85.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 50.0,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0031",
+    "timestamp": "2025-01-11 08:00:00",
+    "timestamp_iso": "2025-01-11T08:00:00",
+    "level": "INFO",
+    "source": "PROCEDURE",
+    "event_type": "procedure",
+    "message": "Cardiac catheterization started | Dr. Patel | Room: Cath Lab 2",
+    "summary": "Cardiac catheterization started",
+    "fields": {
+      "room": "Cath Lab 2"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 31,
+    "parse_confidence": 0.87,
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0032",
+    "timestamp": "2025-01-11 09:30:00",
+    "timestamp_iso": "2025-01-11T09:30:00",
+    "level": "INFO",
+    "source": "PROCEDURE",
+    "event_type": "procedure_event",
+    "message": "Cath completed | Findings: 70% LAD stenosis, 50% RCA | PCI to LAD with DES x1",
+    "summary": "Cath completed",
+    "fields": {
+      "findings": "70% LAD stenosis, 50% RCA"
+    },
+    "normalized_payload": {
+      "procedure_name": "Cath",
+      "status": "completed",
+      "findings": "70% LAD stenosis, 50% RCA"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 32,
+    "parse_confidence": 0.93,
+    "normalization_confidence": 85.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 50.0,
+      "extraction_quality": 100
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0033",
+    "timestamp": "2025-01-11 10:00:00",
+    "timestamp_iso": "2025-01-11T10:00:00",
+    "level": "INFO",
+    "source": "POST-PROC",
+    "event_type": "post_procedure",
+    "message": "Patient stable | Groin site hemostasis achieved | Monitoring initiated",
+    "summary": "Patient stable",
+    "fields": {},
+    "normalized_payload": {
+      "event_name": "Patient stable",
+      "patient_status": "stable"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 33,
+    "parse_confidence": 0.89,
+    "normalization_confidence": 71.8,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 25.0,
+      "extraction_quality": 90
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0034",
+    "timestamp": "2025-01-15 10:00:00",
+    "timestamp_iso": "2025-01-15T10:00:00",
+    "level": "INFO",
+    "source": "DISCHARGE",
+    "event_type": "discharge",
+    "message": "Discharge order entered | Dr. Johnson | MRN: 123456789",
+    "summary": "Discharge order entered",
+    "fields": {
+      "mrn": "123456789"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 34,
+    "parse_confidence": 0.87,
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0035",
+    "timestamp": "2025-01-15 10:30:00",
+    "timestamp_iso": "2025-01-15T10:30:00",
+    "level": "INFO",
+    "source": "PHARMACY",
+    "event_type": "medication_event",
+    "message": "Discharge medications reconciled | 8 medications | Patient counseled",
+    "summary": "Discharge medications reconciled",
+    "fields": {},
+    "normalized_payload": {
+      "action": "discharge_reconciliation"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 35,
+    "parse_confidence": 0.87,
+    "normalization_confidence": 46.3,
+    "review_needed": true,
+    "review_status": "pending_review",
+    "confidence_components": {
+      "required_fields": 50.0,
+      "payload_completeness": 16.7,
+      "extraction_quality": 90
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0036",
+    "timestamp": "2025-01-15 11:00:00",
+    "timestamp_iso": "2025-01-15T11:00:00",
+    "level": "INFO",
+    "source": "EMR-SYSTEM",
+    "event_type": "procedure_event",
+    "message": "Discharge summary completed | Follow-up appointments scheduled",
+    "summary": "Discharge summary completed",
+    "fields": {},
+    "normalized_payload": {
+      "procedure_name": "Discharge summary",
+      "status": "completed"
+    },
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 36,
+    "parse_confidence": 0.89,
+    "normalization_confidence": 78.0,
+    "review_needed": false,
+    "review_status": "approved",
+    "confidence_components": {
+      "required_fields": 100.0,
+      "payload_completeness": 33.3,
+      "extraction_quality": 90
+    },
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0037",
+    "timestamp": "2025-01-15 11:30:00",
+    "timestamp_iso": "2025-01-15T11:30:00",
+    "level": "INFO",
+    "source": "BILLING",
+    "event_type": "billing",
+    "message": "Claim generated | DRG: 282 | ICD-10: I21.4, E11.65, I10 | CPT: 92928",
+    "summary": "Claim generated",
+    "fields": {
+      "drg": "282",
+      "icd_10": "I21.4, E11.65, I10",
+      "cpt": "92928"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [
+        "E11.65",
+        "I10",
+        "I21.4"
+      ],
+      "cpt": [
+        "92928"
+      ]
+    },
+    "line_number": 37,
+    "parse_confidence": 0.91,
+    "review_history": []
+  },
+  {
+    "entry_id": "LOG-0038",
+    "timestamp": "2025-01-15 12:00:00",
+    "timestamp_iso": "2025-01-15T12:00:00",
+    "level": "INFO",
+    "source": "EMR-SYSTEM",
+    "event_type": "emr_system",
+    "message": "Patient discharged | MRN: 123456789 | LOS: 5 days | Disposition: Home",
+    "summary": "Patient discharged",
+    "fields": {
+      "mrn": "123456789",
+      "los": "5 days",
+      "disposition": "Home"
+    },
+    "normalized_payload": {},
+    "clinical_snapshot": {},
+    "codes": {
+      "icd10": [],
+      "cpt": []
+    },
+    "line_number": 38,
+    "parse_confidence": 0.91,
+    "review_history": []
+  }
+]

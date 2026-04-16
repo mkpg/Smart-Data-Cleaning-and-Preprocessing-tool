@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+.env
+.pytest_cache/
+
+# Data & Uploads (Optional: keep if you want demo data, ignore if you want clean start)
+# uploads/*
+# !uploads/.gitkeep
+
+# Project specific
+inputs/*.log
+inputs/*.csv
+# (I'll keep the CSVs in the repo for demo purposes as requested earlier)
+
+# OS
+.DS_Store
+Thumbs.db

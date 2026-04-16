@@ -1,0 +1,37 @@
+{
+  "events": [
+    {
+      "timestamp": "2026-03-13T02:49:09.555979",
+      "type": "compliance_report_generated",
+      "severity": "INFO",
+      "details": {
+        "report_generated": "2026-03-13T02:49:09.555979",
+        "compliance_framework": "HIPAA Safe Harbor",
+        "data_handling": {
+          "total_entries": 38,
+          "phi_items_detected": 0,
+          "phi_items_redacted": 0,
+          "phi_by_type": {}
+        },
+        "approval_workflow": {
+          "total_entries": 38,
+          "reviewed": 1,
+          "approved": 1,
+          "completion_rate": "2.6%"
+        },
+        "quality_metrics": {
+          "avg_confidence": null,
+          "entries_with_review_history": 1
+        },
+        "retention_policy": {
+          "data_retention_days": 2555,
+          "audit_log_retention_days": 2555,
+          "archive_schedule": "quarterly"
+        },
+        "export_format": "JSON",
+        "encryption_status": "At-rest encryption recommended"
+      }
+    }
+  ],
+  "total_events": 1
+}
