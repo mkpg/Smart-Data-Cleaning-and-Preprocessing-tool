@@ -1,0 +1,82 @@
+[
+  {
+    "id": 1001,
+    "full_name": "John Doe",
+    "age": 45,
+    "gender": "Male",
+    "hospital_name": "General Hospital",
+    "admission_date": "2023-05-12",
+    "discharge_date": "2023-05-15",
+    "diagnosis": "Hypertension",
+    "bill_amount": 1500.5,
+    "insurance_valid": true,
+    "medications": [
+      "Lisinopril"
+    ]
+  },
+  {
+    "id": "1002",
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "age": 32,
+    "gender": "Femael",
+    "hospital_name": "General Hopsital",
+    "admission_date": "2023-10-02",
+    "discharge_date": "2023-10-05",
+    "diagnosis": "Flu",
+    "bill_amount": 400.0,
+    "insurance_valid": "Yes",
+    "medications": "Tamiflu, 75mg",
+    "full_name": "Jane Smith"
+  },
+  {
+    "id": 1003,
+    "full_name": "Robert Downey",
+    "age": null,
+    "gender": "M",
+    "hospital_name": "City Care Clinic",
+    "admission_date": "2023-12-01",
+    "discharge_date": "2023-11-30",
+    "diagnosis": "Unknown",
+    "bill_amount": 2500,
+    "insurance_valid": false,
+    "medications": []
+  },
+  {
+    "id": 1004,
+    "full_name": "Emily Blunt",
+    "age": 0,
+    "gender": "Female",
+    "hospital_name": "City Care Clinic",
+    "admission_date": "2024-01-15",
+    "discharge_date": "TBD",
+    "diagnosis": "Fractured Arm",
+    "bill_amount": 3200.0,
+    "insurance_valid": true,
+    "email": "emily.b@example"
+  },
+  {
+    "id": 1001,
+    "full_name": "John Doe",
+    "age": 45,
+    "gender": "Male",
+    "hospital_name": "General Hospital",
+    "admission_date": "2023-05-12",
+    "discharge_date": "2023-05-15",
+    "diagnosis": "Hypertension",
+    "bill_amount": 1500.5,
+    "insurance_valid": true,
+    "medications": [
+      "Lisinopril"
+    ]
+  },
+  {
+    "id": "Unknown_99",
+    "full_name": "N/A",
+    "age": null,
+    "hospital_name": "Unknown",
+    "admission_date": "########",
+    "bill_amount": "Unknown",
+    "notes": "Data corrupted during transfer"
+  }
+]

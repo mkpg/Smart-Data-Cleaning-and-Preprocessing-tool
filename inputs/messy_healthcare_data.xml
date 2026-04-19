@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PATIENTS_DATA export_date="03/07/2026" generated_by="admin1" version="2.1">
+
+  <patient id="PT-00192" status="Active">
+    <n>Johnson, Michael R.</n>
+    <name_alt>Mike Johnson</name_alt>
+    <dob>1978-04-22</dob>
+    <dob_alt>04/22/1978</dob_alt>
+    <gender>M</gender>
+    <gender_alt>Male</gender_alt>
+    <contact>
+      <phone type="home">555-203-9981</phone>
+      <phone type="cell">5552039981</phone>
+      <email>mjohnson@gmail</email>
+    </contact>
+    <insurance>
+      <provider>BlueCross BlueShield</provider>
+      <policy_num>BCB-88821-A</policy_num>
+      <policy_num_alt>88821A</policy_num_alt>
+      <copay>$30.00</copay>
+      <copay_numeric>30</copay_numeric>
+    </insurance>
+    <diagnoses>
+      <dx code="E11.9" system="ICD-10">Type 2 Diabetes Mellitus</dx>
+      <dx code="I10" system="icd10">Essential Hypertension</dx>
+      <dx code="E11.9" system="ICD-10">Type 2 Diabetes Mellitus</dx>
+      <dx code="" system="">Obesity</dx>
+    </diagnoses>
+    <medications>
+      <med>
+        <drug_name>Metformin</drug_name>
+        <dosage>500mg</dosage>
+        <dosage_value>500</dosage_value>
+        <dosage_unit>mg</dosage_unit>
+        <frequency>BID</frequency>
+        <frequency_alt>Twice Daily</frequency_alt>
+        <prescribed_by>Dr. Chen</prescribed_by>
+      </med>
+      <med>
+        <drug_name>Lisinopril</drug_name>
+        <dosage>10 mg</dosage>
+        <frequency>QD</frequency>
+        <prescribed_by npi="1234567890">Dr. Sarah Chen, MD</prescribed_by>
+      </med>
+      <med>
+        <drug_name>LISINOPRIL</drug_name>
+        <dosage>10mg</dosage>
+        <frequency>once daily</frequency>
+        <prescribed_by>chen</prescribed_by>
+      </med>
+    </medications>
+    <visits>
+      <visit date="2025-11-03">
+        <reason>Annual checkup</reason>
+        <bp>128/84</bp>
+        <weight_lbs>214</weight_lbs>
+        <weight_kg>97.1</weight_kg>
+        <notes>Pt reports fatigue. A1C slightly elevated @ 7.4%. Refilled meds. Follow up in 3 months.</notes>
+      </visit>
+      <visit date="11-03-2025">
+        <reason>annual checkup</reason>
+        <bp>128/84 mmHg</bp>
+      </visit>
+    </visits>
+  </patient>
+
+  <patient id="PT-00193" id_legacy="193" status="inactive">
+    <n>    Rivera, Ana   </n>
+    <dob>N/A</dob>
+    <age>34</age>
+    <gender>F</gender>
+    <contact>
+      <phone>555.408.1122</phone>
+      <phone_alt>555-408-1122</phone_alt>
+      <email>ana.rivera@healthmail.com</email>
+    </contact>
+    <insurance>
+      <provider>Aetna</provider>
+      <policy_num>AET-NULL</policy_num>
+      <copay>UNKNOWN</copay>
+    </insurance>
+    <diagnoses>
+      <dx code="J45.901" system="ICD-10">Asthma, unspecified</dx>
+      <dx code="F32.1" system="ICD-10">Major depressive disorder, single episode, moderate</dx>
+      <dx code="F32.1" system="">MDD</dx>
+    </diagnoses>
+    <allergies>
+      <allergy severity="severe">Penicillin</allergy>
+      <allergy severity="mild">Sulfa drugs</allergy>
+      <allergy severity="">penicillin</allergy>
+    </allergies>
+    <medications>
+      <med>
+        <drug_name>Albuterol Inhaler</drug_name>
+        <dosage>90mcg/actuation</dosage>
+        <frequency>PRN</frequency>
+        <prescribed_by>Dr. Okafor</prescribed_by>
+      </med>
+      <med>
+        <drug_name>Sertraline</drug_name>
+        <dosage>50mg</dosage>
+        <frequency>QD</frequency>
+        <prescribed_by>Dr. Patel, Psychiatry</prescribed_by>
+        <start_date>2024/09/15</start_date>
+      </med>
+    </medications>
+    <labs>
+      <lab_result>
+        <test>CBC</test>
+        <date>Jan 15 2026</date>
+        <value>WNL</value>
+        <unit></unit>
+      </lab_result>
+      <lab_result>
+        <test>CBC</test>
+        <date>2026-01-15</date>
+        <wbc>6.2 K/uL</wbc>
+        <rbc>4.5</rbc>
+        <hgb unit="g/dL">13.1</hgb>
+      </lab_result>
+    </labs>
+    <visits></visits>
+  </patient>
+
+  <patient id="PT-00194" status="Active">
+    <n>Thompson, David</n>
+    <dob>1955-12-01</dob>
+    <gender>Male</gender>
+    <contact>
+      <phone>N/A</phone>
+      <email>dthompson55@</email>
+      <address>
+        <street>4402 Maple St</street>
+        <city>Springfield</city>
+        <state>IL</state>
+        <zip>62704</zip>
+        <zip_full>62704-1234</zip_full>
+      </address>
+    </contact>
+    <insurance></insurance>
+    <diagnoses>
+      <dx code="I25.10" system="ICD-10">Coronary artery disease</dx>
+      <dx code="N18.3" system="ICD-10">Chronic kidney disease, stage 3</dx>
+      <dx code="E78.5" system="ICD-10">Hyperlipidemia</dx>
+      <dx code="9999.99" system="ICD-9">INVALID CODE - data entry error</dx>
+    </diagnoses>
+    <medications>
+      <med>
+        <drug_name>Aspirin</drug_name>
+        <dosage>81mg</dosage>
+        <frequency>Daily</frequency>
+        <prescribed_by>Dr. Williams</prescribed_by>
+      </med>
+      <med>
+        <drug_name>Atorvastatin</drug_name>
+        <dosage>40 MG</dosage>
+        <frequency>QHS</frequency>
+        <prescribed_by>Dr. Williams, Cardiology, Northwestern</prescribed_by>
+      </med>
+      <med>
+        <drug_name>Carvedilol</drug_name>
+        <dosage>???</dosage>
+        <frequency>BID</frequency>
+        <notes>Patient unsure of dose. VERIFY AT NEXT VISIT.</notes>
+      </med>
+    </medications>
+    <labs>
+      <lab_result date="2026-02-10">
+        <test name="Creatinine" code="38483-4" system="LOINC">
+          <value>1.8</value>
+          <unit>mg/dL</unit>
+          <reference_range>0.7-1.3</reference_range>
+          <flag>HIGH</flag>
+        </test>
+      </lab_result>
+      <lab_result date="02-10-2026">
+        <test>Creatinine</test>
+        <value>1.8 mg/dL</value>
+        <flag>H</flag>
+      </lab_result>
+      <lab_result date="2026-02-10">
+        <test>eGFR</test>
+        <value>38</value>
+        <unit>mL/min/1.73m2</unit>
+        <flag>LOW</flag>
+        <reference_range>&gt;60</reference_range>
+      </lab_result>
+    </labs>
+    <visits>
+      <visit date="2026-01-20">
+        <reason>Cardiology Follow-Up</reason>
+        <provider>Dr. Williams</provider>
+        <bp_reading1>138/88</bp_reading1>
+        <bp_reading2>136/90</bp_reading2>
+        <weight>187 lbs</weight>
+        <notes>Reviewed recent labs. CKD progression noted. Referred to nephrology. Patient verbalized understanding.</notes>
+        <follow_up>3 months</follow_up>
+        <follow_up_2>nephrology ASAP</follow_up_2>
+      </visit>
+    </visits>
+  </patient>
+
+  <patient id="PT-00195" status="unknown">
+    <n>UNKNOWN</n>
+    <dob>0000-00-00</dob>
+    <gender>U</gender>
+    <insurance></insurance>
+    <medications></medications>
+    <diagnoses></diagnoses>
+    <visits></visits>
+  </patient>
+
+</PATIENTS_DATA>

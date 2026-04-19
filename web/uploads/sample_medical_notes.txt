@@ -1,0 +1,73 @@
+PATIENT DISCHARGE SUMMARY
+========================
+
+Patient: John Doe
+MRN: 123456789
+DOB: 03/15/1965
+SSN: 456-78-9012
+Admission Date: 01/10/2025
+Discharge Date: 01/15/2025
+Attending Physician: Dr. Sarah Johnson
+
+CHIEF COMPLAINT:
+Patient presented with acute chest pain radiating to left arm, shortness of breath, and diaphoresis.
+
+HISTORY OF PRESENT ILLNESS:
+58-year-old male with hx of HTN, DM2, and hyperlipidemia presented to ED with sudden onset CP x 2 hours. Pain rated 8/10, substernal, non-pleuritic. Associated with SOB, diaphoresis, and nausea. Denies syncope, palpitations, or prior episodes.
+
+PAST MEDICAL HISTORY:
+- Hypertension (dx 2010)
+- Diabetes Mellitus Type 2 (dx 2015)
+- Hyperlipidemia
+- Obesity (BMI 32.4)
+- GERD
+
+MEDICATIONS ON ADMISSION:
+1. Metformin 1000mg PO BID
+2. Lisinopril 20mg PO QD
+3. Atorvastatin 40mg PO QHS
+4. Aspirin 81mg PO QD
+5. Omeprazole 20mg PO QD
+
+VITALS ON ADMISSION:
+BP: 165/95 mmHg
+HR: 102 bpm
+RR: 22/min
+Temp: 98.6°F
+SpO2: 94% on RA
+
+LABORATORY RESULTS:
+- Troponin I: 2.4 ng/mL (elevated)
+- BNP: 450 pg/mL
+- CBC: WBC 11.2, Hgb 13.5, Plt 245
+- BMP: Na 140, K 4.2, Cr 1.1, BUN 18, Glucose 245
+- HbA1c: 8.2%
+- Lipid Panel: TC 265, LDL 180, HDL 38, TG 220
+
+ASSESSMENT & PLAN:
+1. NSTEMI - started on heparin drip, dual antiplatelet therapy. Cardiology consulted for cardiac catheterization.
+2. DM2 uncontrolled - insulin sliding scale, endocrine consult
+3. HTN - continue lisinopril, add amlodipine 5mg
+4. Hyperlipidemia - increase atorvastatin to 80mg
+
+DISCHARGE MEDICATIONS:
+1. Metformin 1000mg PO BID
+2. Lisinopril 20mg PO QD
+3. Atorvastatin 80mg PO QHS
+4. Aspirin 325mg PO QD
+5. Clopidogrel 75mg PO QD
+6. Omeprazole 40mg PO QD
+7. Amlodipine 5mg PO QD
+8. Metoprolol 25mg PO BID
+
+FOLLOW-UP:
+- Cardiology in 1 week
+- PCP in 2 weeks
+- Endocrinology in 1 month
+- Cardiac rehab referral
+
+Contact: patient.email@hospital.com
+Phone: (555) 123-4567
+
+Dictated by: Dr. Sarah Johnson, MD
+NPI: 1234567890
