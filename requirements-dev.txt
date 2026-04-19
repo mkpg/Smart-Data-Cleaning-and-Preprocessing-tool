@@ -1,0 +1,28 @@
+# ============================================================
+# DEV / OPTIONAL REQUIREMENTS — NOT installed on Render
+# Install locally with: pip install -r requirements-dev.txt
+# ============================================================
+
+-r requirements.txt
+
+# --- Testing ---
+pytest==7.4.3
+pytest-cov==4.1.0
+pytest-flask==1.3.0
+pytest-mock==3.12.0
+
+# --- Database (if you add persistent storage later) ---
+Flask-SQLAlchemy==3.1.1
+psycopg2-binary==2.9.9
+redis==5.0.1
+Flask-Session==0.5.0
+
+# --- Task Queue (if you add background jobs later) ---
+celery==5.3.4
+
+# --- API Docs ---
+flasgger==0.9.7.1
+
+# --- Heavy ML-based PDF processing (requires >2GB RAM) ---
+# Uncomment only if deploying to a paid Render instance with enough memory:
+# docling==2.31.0

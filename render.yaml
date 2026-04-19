@@ -3,8 +3,12 @@ services:
     name: smart-data-cleaner
     runtime: python
     pythonVersion: "3.11.6"
-    buildCommand: pip install -r SmartCleaner/requirements.txt
-    startCommand: gunicorn --chdir SmartCleaner/web -w 4 -b 0.0.0.0:$PORT server:app
+    buildCommand: pip install --upgrade pip && pip install -r SmartCleaner/requirements.txt
+    startCommand: gunicorn --chdir SmartCleaner/web -w 2 --timeout 300 -b 0.0.0.0:$PORT server:app
     envVars:
-      - key: PORT
-        value: 5000
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: LOG_LEVEL
+        value: INFO
