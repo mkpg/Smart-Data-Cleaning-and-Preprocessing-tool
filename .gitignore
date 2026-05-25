@@ -45,4 +45,7 @@ desktop.ini
 *.swo
 
 # ─── Logs ────────────────────────────────────────────────
+# Ignore runtime log files everywhere EXCEPT the inputs/ demo folder
 *.log
+!inputs/*.log
+!inputs/*.txt

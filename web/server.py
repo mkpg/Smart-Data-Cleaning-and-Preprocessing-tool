@@ -2544,7 +2544,7 @@ def load_unstructured_demo():
 
     demo_files = {
         'txt': 'sample_medical_notes.txt',
-        'log': 'sample_ehr_log.log',
+        'log': 'sample_ehr_log.txt',
         'md': 'sample_clinical_trial.md',
     }
 

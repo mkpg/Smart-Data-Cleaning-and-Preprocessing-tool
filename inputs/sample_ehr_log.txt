@@ -1,0 +1,94 @@
+[2025-01-10 08:01:03] INFO  EHRSystem v4.2.1 starting up — environment=PRODUCTION node=ehr-prod-01
+[2025-01-10 08:01:04] INFO  Database connection established: ehr_db@10.0.1.25:5432
+[2025-01-10 08:01:05] INFO  Authentication service initialized (LDAP + MFA enabled)
+[2025-01-10 08:01:06] INFO  HL7 v2.5 message listener bound on port 2575
+
+[2025-01-10 08:03:11] INFO  USER_LOGIN user=dr.sarah.johnson@hospital.org ip=192.168.1.44 role=ATTENDING_PHYSICIAN session=sess_a1b2c3d4
+[2025-01-10 08:03:45] INFO  PATIENT_RECORD_ACCESS mrn=MRN-123456789 patient="John Doe" dob=03/15/1965 user=dr.sarah.johnson@hospital.org action=VIEW
+[2025-01-10 08:04:02] INFO  ORDER_PLACED order_id=ORD-88210 mrn=MRN-123456789 type=LAB test="Troponin I, BNP, CBC, BMP, HbA1c, Lipid Panel" ordered_by=dr.sarah.johnson@hospital.org
+[2025-01-10 08:04:15] INFO  VITALS_RECORDED mrn=MRN-123456789 BP=165/95 HR=102 RR=22 Temp=98.6F SpO2=94 recorded_by=RN-Maria.Santos
+
+[2025-01-10 08:12:33] WARN  LAB_CRITICAL_VALUE mrn=MRN-123456789 ssn=456-78-9012 test="Troponin I" value=2.4 unit=ng/mL ref_range=<0.04 notified=dr.sarah.johnson@hospital.org
+[2025-01-10 08:12:34] INFO  CRITICAL_ALERT_SENT channel=PAGER recipient=dr.sarah.johnson@hospital.org mrn=MRN-123456789 alert="Troponin I critically elevated: 2.4 ng/mL"
+[2025-01-10 08:12:55] INFO  LAB_RESULT_FILED mrn=MRN-123456789 test=BNP value=450 unit=pg/mL status=ABNORMAL_HIGH
+[2025-01-10 08:13:00] INFO  LAB_RESULT_FILED mrn=MRN-123456789 test=HbA1c value=8.2 unit=% status=ABNORMAL_HIGH
+[2025-01-10 08:13:01] INFO  LAB_RESULT_FILED mrn=MRN-123456789 test="Glucose" value=245 unit=mg/dL status=ABNORMAL_HIGH
+
+[2025-01-10 08:15:10] ERROR HL7_PARSE_ERROR msg_id=MSG-00291 segment=OBX field=5 reason="Unexpected null value in required field" raw="OBX|1|NM|59408-5^SpO2^LN||^|%|95-100||||F"
+[2025-01-10 08:15:11] INFO  HL7_PARSE_ERROR msg_id=MSG-00291 action=REQUEUED retry_count=1
+
+[2025-01-10 08:20:44] INFO  MEDICATION_ADMINISTERED mrn=MRN-123456789 patient="John Doe" dob=1965-03-15 drug=Aspirin dose=325mg route=PO nurse=RN-Maria.Santos barcode_scan=verified
+[2025-01-10 08:21:00] INFO  MEDICATION_ADMINISTERED mrn=MRN-123456789 drug=Heparin dose=5000units route=IV nurse=RN-Maria.Santos
+[2025-01-10 08:21:45] WARN  ALLERGY_CHECK mrn=MRN-123456789 drug=Clopidogrel allergy_flag=NONE status=CLEARED_FOR_ADMINISTRATION
+[2025-01-10 08:22:10] INFO  MEDICATION_ADMINISTERED mrn=MRN-123456789 drug=Clopidogrel dose=300mg route=PO nurse=RN-Maria.Santos
+
+[2025-01-10 08:30:00] INFO  CONSULT_REQUEST consult_id=CONS-5521 mrn=MRN-123456789 specialty=CARDIOLOGY reason="NSTEMI workup, cardiac catheterization evaluation" requested_by=dr.sarah.johnson@hospital.org
+[2025-01-10 08:35:22] INFO  USER_LOGIN user=dr.raj.patel@hospital.org ip=192.168.2.10 role=CARDIOLOGIST session=sess_e5f6g7h8
+[2025-01-10 08:36:01] INFO  PATIENT_RECORD_ACCESS mrn=MRN-123456789 user=dr.raj.patel@hospital.org action=VIEW note="Cardiology consult CONS-5521"
+[2025-01-10 08:36:45] INFO  PROCEDURE_SCHEDULED proc_id=PROC-3310 mrn=MRN-123456789 procedure="Cardiac Catheterization" scheduled_dt=2025-01-11T09:00:00 scheduled_by=dr.raj.patel@hospital.org
+
+[2025-01-10 09:00:01] INFO  SCHEDULED_TASK task=PATIENT_ROUNDING_REMINDER status=FIRED recipients=["dr.sarah.johnson@hospital.org","RN-Maria.Santos"]
+[2025-01-10 09:05:17] WARN  DB_SLOW_QUERY query="SELECT * FROM patient_records WHERE last_modified > NOW() - INTERVAL '1 hour'" duration_ms=4821 threshold_ms=2000
+[2025-01-10 09:05:18] INFO  DB_QUERY_OPTIMIZATION suggestion="Add index on last_modified column in patient_records"
+
+[2025-01-10 09:10:33] INFO  USER_LOGIN user=nurse.amy.chen@hospital.org ip=192.168.1.55 role=REGISTERED_NURSE session=sess_i9j0k1l2
+[2025-01-10 09:11:05] INFO  VITALS_RECORDED mrn=MRN-123456789 BP=158/90 HR=96 RR=20 Temp=98.4F SpO2=96 recorded_by=nurse.amy.chen@hospital.org
+[2025-01-10 09:11:30] INFO  NURSING_NOTE_ADDED mrn=MRN-123456789 note_id=NOTE-7842 author=nurse.amy.chen@hospital.org content="Pt alert and oriented x3. CP improved to 4/10. Heparin drip infusing per protocol at 1200 units/hr. UO adequate."
+
+[2025-01-10 09:45:00] ERROR SESSION_TIMEOUT session=sess_temp_9920 user=unknown ip=10.10.5.200 reason="Inactive session exceeded 15-minute limit" action=TERMINATED
+[2025-01-10 09:46:11] WARN  FAILED_LOGIN user=john.doe.patient@gmail.com ip=203.0.113.88 reason="Invalid credentials" attempt=3
+[2025-01-10 09:46:12] WARN  ACCOUNT_LOCKOUT user=john.doe.patient@gmail.com lockout_duration=30min triggered_by="3 consecutive failed logins"
+
+[2025-01-10 10:00:00] INFO  BACKUP_JOB job_id=BKP-20250110-01 status=STARTED target=ehr_db type=INCREMENTAL
+[2025-01-10 10:08:33] INFO  BACKUP_JOB job_id=BKP-20250110-01 status=COMPLETED size_gb=2.34 duration_sec=513
+
+[2025-01-10 10:15:44] INFO  MEDICATION_ADMINISTERED mrn=MRN-123456789 drug=Metformin dose=1000mg route=PO nurse=nurse.amy.chen@hospital.org
+[2025-01-10 10:16:00] INFO  MEDICATION_ADMINISTERED mrn=MRN-123456789 drug=Lisinopril dose=20mg route=PO nurse=nurse.amy.chen@hospital.org
+[2025-01-10 10:16:30] WARN  MEDICATION_DUE_OVERDUE mrn=MRN-123456789 drug=Atorvastatin scheduled=09:00 current=10:16 delay_min=76 nurse=nurse.amy.chen@hospital.org
+[2025-01-10 10:17:00] INFO  MEDICATION_ADMINISTERED mrn=MRN-123456789 drug=Atorvastatin dose=80mg route=PO nurse=nurse.amy.chen@hospital.org
+
+[2025-01-10 10:30:21] INFO  IMAGING_ORDER order_id=IMG-4490 mrn=MRN-123456789 type="Chest X-Ray PA/LAT" ordered_by=dr.sarah.johnson@hospital.org priority=ROUTINE
+[2025-01-10 10:45:55] INFO  IMAGING_COMPLETE order_id=IMG-4490 mrn=MRN-123456789 radiologist=dr.kim.lee@hospital.org findings="Mild cardiomegaly. No acute pulmonary edema. No pneumothorax."
+
+[2025-01-10 11:00:00] ERROR INTEGRATION_FAILURE service=PHARMACY_SYSTEM endpoint=http://pharmacy.internal/api/v2/orders error="Connection timed out after 30s" mrn=MRN-123456789 order=ORD-88215
+[2025-01-10 11:00:01] INFO  INTEGRATION_RETRY service=PHARMACY_SYSTEM retry_count=1 delay_sec=5
+[2025-01-10 11:00:07] INFO  INTEGRATION_SUCCESS service=PHARMACY_SYSTEM order=ORD-88215 status=RECEIVED
+
+[2025-01-10 11:30:10] INFO  PATIENT_TRANSFER mrn=MRN-123456789 patient="John Doe" dob=03/15/1965 from_unit=ED to_unit=CCU bed=CCU-04 transferred_by=dr.sarah.johnson@hospital.org
+[2025-01-10 11:31:00] INFO  VITALS_RECORDED mrn=MRN-123456789 BP=150/88 HR=88 RR=18 Temp=98.5F SpO2=97 recorded_by=RN-Carlos.Rivera
+
+[2025-01-10 12:00:00] INFO  SHIFT_CHANGE outgoing_nurse=RN-Maria.Santos incoming_nurse=RN-Carlos.Rivera unit=ED handoff_mrns=["MRN-123456789","MRN-987654321","MRN-112233445"]
+[2025-01-10 12:01:15] INFO  USER_LOGIN user=RN-Carlos.Rivera@hospital.org ip=192.168.1.60 role=REGISTERED_NURSE session=sess_m3n4o5p6
+
+[2025-01-10 12:15:44] WARN  DUPLICATE_ORDER_DETECTED order_id=ORD-88222 mrn=MRN-123456789 test="CBC" flagged_duplicate_of=ORD-88210 ordered_by=dr.raj.patel@hospital.org action=HELD_FOR_REVIEW
+[2025-01-10 12:16:00] INFO  DUPLICATE_ORDER_CANCELLED order_id=ORD-88222 mrn=MRN-123456789 cancelled_by=SYSTEM reason="Duplicate of ORD-88210 within 24h window"
+
+[2025-01-10 13:00:00] INFO  AUDIT_LOG_SNAPSHOT snapshot_id=SNAP-20250110-13 records_processed=14823 phi_events=342 critical_alerts=1 errors=4 warnings=9
+
+[2025-01-10 13:20:00] INFO  USER_LOGIN user=dr.sarah.johnson@hospital.org ip=192.168.1.44 role=ATTENDING_PHYSICIAN session=sess_q7r8s9t0
+[2025-01-10 13:20:45] INFO  PROGRESS_NOTE_ADDED mrn=MRN-123456789 note_id=NOTE-7901 author=dr.sarah.johnson@hospital.org content="Pt hemodynamically stable in CCU. Troponin trending up, peak expected. Cath scheduled AM tomorrow. DM managed with sliding scale insulin."
+[2025-01-10 13:21:10] INFO  ORDER_PLACED order_id=ORD-88230 mrn=MRN-123456789 type=MEDICATION drug=Amlodipine dose=5mg route=PO frequency=QD ordered_by=dr.sarah.johnson@hospital.org
+
+[2025-01-10 14:00:00] INFO  LAB_RESULT_FILED mrn=MRN-123456789 test="Troponin I" value=5.8 unit=ng/mL status=CRITICAL_HIGH delta="+3.4 from 08:12"
+[2025-01-10 14:00:01] WARN  LAB_CRITICAL_VALUE mrn=MRN-123456789 test="Troponin I" value=5.8 unit=ng/mL notified=dr.sarah.johnson@hospital.org notified=dr.raj.patel@hospital.org
+
+[2025-01-10 15:00:00] ERROR EHR_SYNC_ERROR target=REFERRAL_PORTAL msg="SSL handshake failed: certificate expired" host=referral.externalclinic.com cert_expiry=2025-01-09 action=SYNC_SKIPPED
+[2025-01-10 15:00:05] WARN  CERTIFICATE_ALERT host=referral.externalclinic.com days_since_expiry=1 alert_sent_to=it-security@hospital.org
+
+[2025-01-10 16:00:00] INFO  MEDICATION_ADMINISTERED mrn=MRN-123456789 drug=Heparin dose=1200units/hr route=IV_DRIP nurse=RN-Carlos.Rivera ptt_check="PTT 68s — therapeutic"
+[2025-01-10 16:01:00] INFO  VITALS_RECORDED mrn=MRN-123456789 BP=145/85 HR=82 RR=16 Temp=98.7F SpO2=98 recorded_by=RN-Carlos.Rivera
+
+[2025-01-10 17:30:00] INFO  DIETARY_CONSULT consult_id=CONS-5545 mrn=MRN-123456789 reason="DM2 with uncontrolled glucose, cardiac diet" requested_by=dr.sarah.johnson@hospital.org dietitian=Maria.Gonzalez@hospital.org
+[2025-01-10 17:45:00] INFO  CONSENT_FORM_SIGNED mrn=MRN-123456789 patient="John Doe" form="Cardiac Catheterization Consent" signed_dt=2025-01-10T17:45:00 witness=RN-Carlos.Rivera
+
+[2025-01-10 18:00:00] INFO  SHIFT_CHANGE outgoing_nurse=RN-Carlos.Rivera incoming_nurse=RN-Priya.Sharma unit=CCU handoff_mrns=["MRN-123456789","MRN-445566778"]
+[2025-01-10 18:01:00] INFO  USER_LOGIN user=RN-Priya.Sharma@hospital.org ip=192.168.1.72 role=REGISTERED_NURSE session=sess_u1v2w3x4
+
+[2025-01-10 20:00:00] INFO  VITALS_RECORDED mrn=MRN-123456789 BP=140/82 HR=78 RR=16 Temp=98.6F SpO2=99 recorded_by=RN-Priya.Sharma
+[2025-01-10 20:00:30] INFO  GLUCOSE_CHECK mrn=MRN-123456789 value=185 unit=mg/dL nurse=RN-Priya.Sharma action="Sliding scale insulin 4 units SubQ administered"
+
+[2025-01-10 22:00:00] INFO  VITALS_RECORDED mrn=MRN-123456789 BP=138/80 HR=76 RR=15 Temp=98.5F SpO2=99 recorded_by=RN-Priya.Sharma
+[2025-01-10 22:01:00] INFO  NURSING_NOTE_ADDED mrn=MRN-123456789 note_id=NOTE-7955 author=RN-Priya.Sharma@hospital.org content="Pt resting comfortably. CP resolved. VSS. Ready for cath in AM per Dr. Patel."
+
+[2025-01-10 23:55:00] INFO  DAILY_REPORT_GENERATED date=2025-01-10 total_admissions=47 total_discharges=38 critical_patients=12 icu_census=18 medication_errors=0 near_miss_events=1 audit_flags=3
+[2025-01-10 23:59:59] INFO  EHRSystem v4.2.1 daily log rotation — archiving to ehr_logs_2025-01-10.tar.gz
