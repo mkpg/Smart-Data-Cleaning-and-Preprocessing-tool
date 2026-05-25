@@ -17,8 +17,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Ensure the uploads directory exists at runtime
-RUN mkdir -p SmartCleaner/web/uploads/audit_exports \
-             SmartCleaner/web/uploads/review_store
+RUN mkdir -p web/uploads/audit_exports \
+             web/uploads/review_store
 
 # Expose port (Render overrides with $PORT env var via gunicorn -b)
 EXPOSE 5000
@@ -29,7 +29,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
 
 # Production server — 2 workers, 300s timeout for large file processing
 CMD ["gunicorn", \
-     "--chdir", "SmartCleaner/web", \
+     "--chdir", "web", \
      "--workers=2", \
      "--timeout=300", \
      "--bind=0.0.0.0:5000", \
