@@ -1,14 +1,19 @@
 services:
   - type: web
-    name: smart-data-cleaner
+    name: medicl-smart-data-cleaner
     runtime: python
     pythonVersion: "3.11.6"
-    buildCommand: pip install --upgrade pip && pip install -r SmartCleaner/requirements.txt
+    rootDir: .
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: gunicorn --chdir SmartCleaner/web -w 2 --timeout 300 -b 0.0.0.0:$PORT server:app
+    healthCheckPath: /health
     envVars:
       - key: FLASK_ENV
         value: production
+      - key: FLASK_DEBUG
+        value: "false"
       - key: SECRET_KEY
         generateValue: true
       - key: LOG_LEVEL
         value: INFO
+    plan: free

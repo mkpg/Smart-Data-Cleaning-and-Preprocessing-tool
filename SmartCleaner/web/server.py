@@ -2783,9 +2783,16 @@ except ImportError:
     SYMSPELL_AVAILABLE = False
 
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint for Render / load balancers."""
+    return jsonify({'status': 'ok', 'version': 'v0.0.7'}), 200
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
     print(f"🚀 Starting Smart Data Cleaner Web Server on port {port}...")
     print(f"📍 Access locally at http://localhost:{port}")
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=debug, host='0.0.0.0', port=port)
 

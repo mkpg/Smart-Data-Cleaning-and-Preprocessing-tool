@@ -30,26 +30,43 @@
         /* Navbar */
         nav {
             position: fixed;
-            top: 0; width: 100%;
-            background: var(--bg-nav);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            top: 1.5rem; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 3rem); max-width: 1100px;
+            background: rgba(10, 10, 10, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 100px;
             z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
         }
 
         .nav-container {
             max-width: 1200px; margin: 0 auto;
-            padding: 1rem 2rem;
+            padding: 0.75rem 2rem;
             display: flex; justify-content: space-between; align-items: center;
         }
 
         .logo {
-            font-size: 1.25rem; font-weight: 800; letter-spacing: -0.5px;
+            font-size: 1.35rem; font-weight: 800; letter-spacing: -0.5px;
             background: linear-gradient(135deg, #6366f1, #d946ef);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+        }
+        .logo:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
         }
 
         .nav-links a {
@@ -60,42 +77,50 @@
         .nav-links a:hover { color: var(--text-primary); }
 
         .btn-launch {
-            background: #ffffff; color: #000000;
-            padding: 0.5rem 1.25rem; border-radius: 99px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: #ffffff;
+            padding: 0.6rem 1.5rem; border-radius: 99px;
             font-weight: 600; text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             margin-left: 2rem;
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
         }
 
         .btn-launch:hover {
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
-            transform: scale(1.02);
+            box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
+            transform: translateY(-1px) scale(1.03);
         }
 
         /* Hero */
         .hero {
-            padding: 12rem 2rem 8rem; text-align: center;
-            max-width: 900px; margin: 0 auto;
+            padding: 13rem 2rem 6rem; text-align: center;
+            max-width: 950px; margin: 0 auto;
         }
 
         .badge {
             display: inline-block;
-            padding: 0.4rem 1rem; border-radius: 99px;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            color: #818cf8; font-size: 0.85rem; font-weight: 600;
-            margin-bottom: 2rem;
+            padding: 0.4rem 1.2rem; border-radius: 99px;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            color: #818cf8; font-size: 0.8rem; font-weight: 600;
+            margin-bottom: 2.5rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
         }
 
         h1 {
-            font-size: 4.5rem; font-weight: 800; line-height: 1.1; letter-spacing: -2px;
+            font-size: 4.8rem; font-weight: 800; line-height: 1.05; letter-spacing: -3px;
             margin-bottom: 1.5rem;
+            background: linear-gradient(180deg, #ffffff 40%, rgba(255,255,255,0.7) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         p.subtitle {
             font-size: 1.25rem; color: var(--text-secondary);
-            margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto;
+            margin-bottom: 3rem; max-width: 650px; margin-left: auto; margin-right: auto;
+            line-height: 1.6;
         }
 
         .cta-group {
@@ -104,44 +129,211 @@
 
         .btn-primary-large {
             background: linear-gradient(135deg, #6366f1, #a855f7); color: white;
-            padding: 1rem 2.5rem; border-radius: 12px;
-            font-size: 1.1rem; font-weight: 600; text-decoration: none;
-            transition: all 0.2s;
+            padding: 1rem 3rem; border-radius: 12px;
+            font-size: 1.15rem; font-weight: 600; text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             box-shadow: 0 10px 30px var(--accent-glow);
         }
 
         .btn-primary-large:hover {
-            transform: translateY(-2px); box-shadow: 0 15px 40px var(--accent-glow);
+            transform: translateY(-2px); box-shadow: 0 15px 40px rgba(99, 102, 241, 0.6);
+        }
+
+        /* Dashboard Mockup */
+        .dashboard-mockup {
+            max-width: 850px;
+            margin: 4.5rem auto 0;
+            background: rgba(10, 10, 12, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 50px rgba(99, 102, 241, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            text-align: left;
+            animation: mockup-float 6s ease-in-out infinite;
+        }
+
+        @keyframes mockup-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .mock-header {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 0.85rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mock-dots { display: flex; gap: 6px; }
+        .mock-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+        .mock-dot.red { background: #ff5f56; }
+        .mock-dot.yellow { background: #ffbd2e; }
+        .mock-dot.green { background: #27c93f; }
+
+        .mock-title {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .mock-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            height: 380px;
+        }
+
+        .mock-sidebar {
+            background: rgba(0, 0, 0, 0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .mock-nav-item {
+            padding: 0.6rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .mock-nav-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: white;
+            border-left: 3px solid #6366f1;
+        }
+
+        .mock-body {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .mock-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .mock-stat {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+        }
+
+        .mock-stat h4 {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .mock-stat p {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .mock-table {
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            overflow: hidden;
+        }
+
+        .mock-table-row {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr 0.8fr;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            align-items: center;
+        }
+
+        .mock-table-row.header {
+            background: rgba(255, 255, 255, 0.02);
+            font-weight: 600;
+            color: white;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .mock-table-row:last-child { border-bottom: none; }
+
+        .mock-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-align: center;
+            width: fit-content;
+        }
+
+        .mock-badge.success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .mock-badge.warning { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+        .mock-badge.info { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+
+        .redacted-placeholder {
+            font-family: monospace;
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 0.7rem;
         }
 
         /* Features */
-        .features { max-width: 1200px; margin: 0 auto 8rem; padding: 0 2rem; }
+        .features { max-width: 1200px; margin: 6rem auto 6rem; padding: 0 2rem; }
         
         .grid {
             display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;
         }
 
         .card {
-            background: rgba(20, 20, 20, 0.6);
+            background: rgba(20, 20, 25, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.05);
             padding: 2.5rem; border-radius: 16px;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            backdrop-filter: blur(10px);
         }
 
         .card:hover {
             border-color: rgba(99, 102, 241, 0.3);
-            background: rgba(30, 30, 30, 0.8);
+            background: rgba(30, 30, 38, 0.7);
             transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.05);
         }
 
-        .card h3 { font-size: 1.25rem; margin-bottom: 1rem; color: white; }
-        .card p { color: var(--text-secondary); font-size: 0.95rem; }
+        .card h3 { font-size: 1.25rem; margin-bottom: 1rem; color: white; letter-spacing: -0.2px; }
+        .card p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; }
 
         .icon-box {
             width: 48px; height: 48px; border-radius: 12px;
-            background: rgba(99, 102, 241, 0.1);
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.15);
             display: flex; align-items: center; justify-content: center;
             margin-bottom: 1.5rem; font-size: 1.5rem;
+            color: #818cf8;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; letter-spacing: -1.5px; }
+            .mock-grid { grid-template-columns: 1fr; }
+            .mock-sidebar { display: none; }
+            nav { width: calc(100% - 1.5rem); top: 0.75rem; }
         }
     </style>
 </head>
@@ -149,7 +341,7 @@
 
     <nav>
         <div class="nav-container">
-            <div class="logo">Medicl.</div>
+            <a href="/" class="logo">Medicl.</a>
             <div class="nav-links">
                 <a href="#features">Capabilities</a>
                 <a href="/docs">Documentation</a>
@@ -164,6 +356,67 @@
         <p class="subtitle">An advanced platform to sanitize, structure, and validate complex medical datasets and clinical records with intelligent parsing models.</p>
         <div class="cta-group">
             <a href="/app" class="btn-primary-large">Get Started</a>
+        </div>
+
+        <!-- Interactive Preview Dashboard Mockup -->
+        <div class="dashboard-mockup">
+            <div class="mock-header">
+                <div class="mock-dots">
+                    <span class="mock-dot red"></span>
+                    <span class="mock-dot yellow"></span>
+                    <span class="mock-dot green"></span>
+                </div>
+                <div class="mock-title">medicl-preprocess-pipeline.log</div>
+            </div>
+            <div class="mock-grid">
+                <aside class="mock-sidebar">
+                    <div class="mock-nav-item active">🔍 Data Analysis</div>
+                    <div class="mock-nav-item">⚙️ Review & Adjust</div>
+                    <div class="mock-nav-item">🚀 Execute & Export</div>
+                </aside>
+                <main class="mock-body">
+                    <div class="mock-stats">
+                        <div class="mock-stat">
+                            <h4>Processed Rows</h4>
+                            <p>8,509</p>
+                        </div>
+                        <div class="mock-stat">
+                            <h4>Quality Index</h4>
+                            <p style="color: #10b981;">98.4%</p>
+                        </div>
+                        <div class="mock-stat">
+                            <h4>PHI Redactions</h4>
+                            <p style="color: #ef4444;">128 flagged</p>
+                        </div>
+                    </div>
+                    <div class="mock-table">
+                        <div class="mock-table-row header">
+                            <div>Patient Name</div>
+                            <div>Diagnosis</div>
+                            <div>ICD-10 Code</div>
+                            <div>Status</div>
+                        </div>
+                        <div class="mock-table-row">
+                            <div><span class="redacted-placeholder">REDACTED-NAME</span></div>
+                            <div>Diabeties Mellitus</div>
+                            <div style="font-family: monospace;">E11.9</div>
+                            <div><span class="mock-badge warning">Auto-Corrected</span></div>
+                        </div>
+                        <div class="mock-table-row">
+                            <div><span class="redacted-placeholder">REDACTED-NAME</span></div>
+                            <div>Hypertention Essential</div>
+                            <div style="font-family: monospace;">I10</div>
+                            <div><span class="mock-badge success">Matched</span></div>
+                        </div>
+                        <div class="mock-table-row">
+                            <div><span class="redacted-placeholder">REDACTED-NAME</span></div>
+                            <div>Asthma Chronic</div>
+                            <div style="font-family: monospace;">J45.909</div>
+                            <div><span class="mock-badge info">Valid</span></div>
+                        </div>
+                    </div>
+                </main>
+            </div>
         </div>
     </header>
 
@@ -186,6 +439,57 @@
             </div>
         </div>
     </section>
+
+    <!-- Trust & Compliance Section -->
+    <section class="trust-section" style="max-width: 1200px; margin: 0 auto 8rem; padding: 0 2rem; text-align: center;">
+        <h2 style="font-size: 2.25rem; font-weight: 800; margin-bottom: 1.5rem; letter-spacing: -1px;">Built for Secure Healthcare Environments</h2>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 3rem;">Medicl is designed to comply with strict institutional guidelines for handling sensitive patient information.</p>
+        <div style="display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap;">
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 1.5rem 2rem; flex: 1; min-width: 250px; max-width: 350px; text-align: left;">
+                <h4 style="color: #6366f1; font-size: 1.1rem; margin-bottom: 0.5rem;">🔒 HIPAA Compliance</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">Rule-based de-identification to remove 18 HIPAA identifiers from unstructured data.</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 1.5rem 2rem; flex: 1; min-width: 250px; max-width: 350px; text-align: left;">
+                <h4 style="color: #a855f7; font-size: 1.1rem; margin-bottom: 0.5rem;">⚡ 100% Local Processing</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">No data is uploaded to external clouds. All parsing is done entirely in your local browser session.</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 1.5rem 2rem; flex: 1; min-width: 250px; max-width: 350px; text-align: left;">
+                <h4 style="color: #10b981; font-size: 1.1rem; margin-bottom: 0.5rem;">📄 Complete Audit Logs</h4>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6;">Export comprehensive JSON lineage files that log every transformation for validation.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Legitimate SaaS Footer -->
+    <footer style="border-top: 1px solid rgba(255, 255, 255, 0.05); padding: 4rem 2rem; max-width: 1200px; margin: 0 auto;">
+        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 3rem; margin-bottom: 3rem;">
+            <div>
+                <a href="/" class="logo" style="margin-bottom: 1rem;">Medicl.</a>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; max-width: 250px; line-height: 1.6; margin-top: 0.5rem;">Advanced data cleaning and preprocessing pipelines for clinical datasets and healthcare AI models.</p>
+            </div>
+            <div style="display: flex; gap: 4rem; flex-wrap: wrap;">
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <h5 style="color: white; font-size: 0.9rem;">Platform</h5>
+                    <a href="#features" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; transition: color 0.2s;">Capabilities</a>
+                    <a href="/app" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; transition: color 0.2s;">Launch App</a>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <h5 style="color: white; font-size: 0.9rem;">Resources</h5>
+                    <a href="/docs" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; transition: color 0.2s;">Documentation</a>
+                    <a href="/docs#api-reference" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; transition: color 0.2s;">API Reference</a>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <h5 style="color: white; font-size: 0.9rem;">Compliance</h5>
+                    <a href="/docs#faq" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; transition: color 0.2s;">FAQ</a>
+                    <a href="/docs#operations" style="color: var(--text-secondary); text-decoration: none; font-size: 0.85rem; transition: color 0.2s;">PHI Standards</a>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid rgba(255, 255, 255, 0.02); padding-top: 2rem;">
+            <span>&copy; 2026 Medicl Healthcare AI. All rights reserved.</span>
+            <span>Designed for clinical precision.</span>
+        </div>
+    </footer>
 
 </body>
 </html>

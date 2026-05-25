@@ -339,12 +339,29 @@ python server.py</code></pre>
             <h1>API Reference</h1>
             <p>Our RESTful API allows you to integrate Medicl's cleaning pipeline into your own clinical workflows and applications.</p>
 
-            <h3 id="api-auth">Authentication & Sessions</h3>
-            <p>The API uses session-based tracking. A session is automatically created upon your first valid file upload.</p>
+            <h3 id="api-auth">Authentication &amp; Sessions</h3>
+            <p>The API uses session-based tracking. A unique <code>session_id</code> (UUID v4) is created automatically when you upload a file and must be passed to all subsequent calls.</p>
             
             <h3 id="api-upload">Upload Endpoint</h3>
             <pre><button class="copy-btn">Copy</button><code>POST /api/upload
-Content-Type: multipart/form-data</code></pre>
+Content-Type: multipart/form-data
+
+Form field: file  (CSV, XLSX/XLS, JSON, XML, TXT, PDF, LOG supported)
+Max size  : 50 MB</code></pre>
+
+            <h4>Response</h4>
+            <pre><button class="copy-btn">Copy</button><code>{
+  "success": true,
+  "session_id": "3f7b1e2c-...",
+  "filename": "patient_records.csv",
+  "file_type": "CSV",
+  "overview": { "rows": 5000, "columns": 12, "memory_usage_mb": 0.48, "total_cells": 60000 },
+  "quality_score": { "overall": 74.2, "completeness": 91.0, "consistency": 88.5, ... },
+  "quality_issues": [ ... ],
+  "recommendations": [ ... ],
+  "schema_mapping": { "domain": "healthcare", "suggestions": [ ... ] },
+  "preview": { "rows": [ ... ], "total_rows": 5000 }
+}</code></pre>
             
             <h4>Python Example</h4>
             <pre><button class="copy-btn">Copy</button><code>import requests
@@ -357,19 +374,53 @@ session_id = r.json()['session_id']</code></pre>
             <pre><button class="copy-btn">Copy</button><code>POST /api/execute
 Content-Type: application/json</code></pre>
 
-            <h4>Example Payload</h4>
+            <h4>Request Body</h4>
             <pre><button class="copy-btn">Copy</button><code>{
-  "session_id": "uuid-here",
+  "session_id": "3f7b1e2c-...",
   "operations": {
-    "redact_phi": { "checked": true },
-    "remove_duplicates": { "checked": true },
-    "smart_type_conversion": { "checked": true }
+    "redact_phi":           { "checked": true },
+    "remove_duplicates":    { "checked": true },
+    "smart_type_conversion":{ "checked": true },
+    "handle_missing":       { "checked": true, "method": "auto" },
+    "handle_outliers":      { "checked": true, "method": "cap" }
   }
 }</code></pre>
 
+            <h4>All Supported Operations</h4>
+            <table>
+                <tr><th>Key</th><th>Description</th><th>Extra Config</th></tr>
+                <tr><td><code>smart_type_conversion</code></td><td>Auto-detects and fixes data type mismatches in columns</td><td>—</td></tr>
+                <tr><td><code>handle_missing</code></td><td>Fills or drops missing values using a chosen strategy</td><td><code>"method": "auto" | "mean" | "median" | "mode" | "drop"</code></td></tr>
+                <tr><td><code>remove_duplicates</code></td><td>Removes fully duplicated rows</td><td>—</td></tr>
+                <tr><td><code>handle_outliers</code></td><td>Detects and caps/removes statistical outliers (Z-score / IQR)</td><td><code>"method": "cap" | "remove"</code></td></tr>
+                <tr><td><code>redact_phi</code></td><td>Redacts names, phones, emails &amp; IDs for HIPAA/GDPR compliance</td><td>—</td></tr>
+                <tr><td><code>standardize_codes</code></td><td>Maps diagnoses to ICD-10 codes; validates LOINC lab codes</td><td>—</td></tr>
+                <tr><td><code>validate_clinical</code></td><td>Checks clinical values are within medically plausible ranges</td><td>—</td></tr>
+                <tr><td><code>validate_ranges</code></td><td>Validates numeric columns against expected value ranges</td><td>—</td></tr>
+                <tr><td><code>normalize_clinical_text</code></td><td>Expands medical abbreviations and corrects common misspellings</td><td>—</td></tr>
+                <tr><td><code>clean_text</code></td><td>Strips special characters and normalises whitespace in text fields</td><td>—</td></tr>
+                <tr><td><code>remove_high_missing</code></td><td>Drops columns whose missing-value rate exceeds a threshold</td><td><code>"threshold": 0.5</code> (0–1 fraction)</td></tr>
+                <tr><td><code>feature_engineering</code></td><td>Derives new features (e.g. age buckets, date parts) automatically</td><td>—</td></tr>
+                <tr><td><code>ml_impute_missing</code></td><td>Uses a Random Forest model to impute missing values (requires scikit-learn)</td><td>—</td></tr>
+            </table>
+
             <h3 id="api-export">Export Endpoint</h3>
-            <p>Retrieve the cleaned data once processing is complete.</p>
-            <pre><button class="copy-btn">Copy</button><code>GET /api/export/{session_id}?format=csv</code></pre>
+            <p>Retrieve the cleaned data as a CSV file once processing is complete. If no cleaning has been run yet, the original uploaded data is returned.</p>
+            <pre><button class="copy-btn">Copy</button><code>GET /api/export/{session_id}
+
+Response: text/csv  (attachment; filename=cleaned_data.csv)</code></pre>
+
+            <div class="callout warning">
+                <div class="callout-title">Export Format</div>
+                <p>The export endpoint always returns <strong>CSV</strong>. Call <code>/api/execute</code> first; if you call export before executing any operations, the original unmodified data is returned.</p>
+            </div>
+
+            <h4>Python Example</h4>
+            <pre><button class="copy-btn">Copy</button><code>import requests
+
+r = requests.get(f'http://localhost:5000/api/export/{session_id}')
+with open('cleaned_output.csv', 'wb') as f:
+    f.write(r.content)</code></pre>
         </section>
 
         <section id="faq">

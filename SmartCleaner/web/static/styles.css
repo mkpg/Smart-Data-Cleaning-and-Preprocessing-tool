@@ -3767,3 +3767,62 @@ select option {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     outline: none;
 }
+
+/* ============================================
+   MEDICL PREMIUM AESTHETIC UPGRADES
+   ============================================ */
+
+/* Logo Link styles */
+.logo-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+}
+
+.logo-link:hover {
+    transform: scale(1.02);
+    opacity: 0.9;
+}
+
+/* Upgraded button glows */
+.primary-btn, .execute-btn, .export-btn:not(.secondary), .viz-add-btn, .consent-accept-btn {
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.primary-btn:hover:not(:disabled), 
+.execute-btn:hover:not(:disabled), 
+.export-btn:not(.secondary):hover:not(:disabled), 
+.viz-add-btn:hover:not(:disabled), 
+.consent-accept-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45), 0 0 10px rgba(217, 70, 239, 0.2);
+}
+
+/* Modern tabs navigation bar */
+.tab-nav {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(10, 10, 12, 0.6) !important;
+    padding: 6px !important;
+}
+
+.tab-btn.active {
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4), 0 0 10px rgba(217, 70, 239, 0.2) !important;
+}
+
+/* Card hover and modern glassmorphic look */
+.result-card, .upload-section, .strategy-section, .operations-section, .final-summary-section, .cleaning-results-section, .unstruct-upload-section, .unstruct-options-section {
+    background: rgba(12, 12, 14, 0.65) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.result-card:hover {
+    border-color: rgba(99, 102, 241, 0.25) !important;
+}

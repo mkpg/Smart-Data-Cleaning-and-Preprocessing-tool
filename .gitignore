@@ -1,21 +1,48 @@
-# Python
+# ─── Python ───────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyo
+*.pyd
+.Python
+
+# ─── Virtual Environments ────────────────────────────────
 venv/
 .venv/
+env/
+ENV/
+
+# ─── Environment / Secrets ───────────────────────────────
 .env
+# Keep .env.example in the repo — it's a template, not secrets
+
+# ─── Uploaded user files (runtime only, never commit) ────
+SmartCleaner/web/uploads/*
+web/uploads/*
+# But keep the directory itself so the app can write to it
+!SmartCleaner/web/uploads/.gitkeep
+!web/uploads/.gitkeep
+!SmartCleaner/web/uploads/audit_exports/.gitkeep
+!SmartCleaner/web/uploads/review_store/.gitkeep
+
+# ─── Test / cache ────────────────────────────────────────
 .pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+build/
 
-# Data & Uploads (Optional: keep if you want demo data, ignore if you want clean start)
-# uploads/*
-# !uploads/.gitkeep
-
-# Project specific
-inputs/*.log
-inputs/*.csv
-# (I'll keep the CSVs in the repo for demo purposes as requested earlier)
-
-# OS
+# ─── OS generated ────────────────────────────────────────
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# ─── IDE ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ─── Logs ────────────────────────────────────────────────
+*.log

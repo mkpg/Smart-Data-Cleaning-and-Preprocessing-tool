@@ -3,38 +3,36 @@ FROM python:3.11-slim
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies (libmagic for file type detection)
 RUN apt-get update && apt-get install -y \
     gcc \
-    postgresql-client \
     libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Copy requirements and install Python packages
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
 
-# Create uploads directory
-RUN mkdir -p uploads
+# Ensure the uploads directory exists at runtime
+RUN mkdir -p SmartCleaner/web/uploads/audit_exports \
+             SmartCleaner/web/uploads/review_store
 
-# Expose port
+# Expose port (Render overrides with $PORT env var via gunicorn -b)
 EXPOSE 5000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/health').read()"
 
-# Run with gunicorn
+# Production server — 2 workers, 300s timeout for large file processing
 CMD ["gunicorn", \
-     "--workers=4", \
-     "--worker-class=sync", \
+     "--chdir", "SmartCleaner/web", \
+     "--workers=2", \
+     "--timeout=300", \
      "--bind=0.0.0.0:5000", \
-     "--timeout=120", \
      "--access-logfile=-", \
      "--error-logfile=-", \
-     "wsgi:app"]
+     "server:app"]
