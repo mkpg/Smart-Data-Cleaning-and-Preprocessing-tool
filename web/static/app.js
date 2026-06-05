@@ -18,6 +18,7 @@ class SmartDataCleaner {
         this.initElements();
         this.initEventListeners();
         this.renderOperations(); // Initialize operations for default strategy
+        this.initMouseGlow();
     }
 
     initElements() {
@@ -320,6 +321,9 @@ class SmartDataCleaner {
             this.schemaMapping = result.schema_mapping;
             this.renderSchemaMapping(result.schema_mapping);
         }
+
+        // Populate the Bento Grid cards
+        this.updateBentoGrid(result);
 
         this.updateFinalSummary();
     }
@@ -1474,6 +1478,174 @@ ${ops}
             return;
         }
         window.open(`/api/export/lineage/${this.sessionId}`, '_blank');
+    }
+
+    initMouseGlow() {
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.bento-card, .result-card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    }
+
+    updateBentoGrid(result) {
+        // 1. Data Quality Score
+        const score = result.quality_score ? result.quality_score.overall : 100;
+        this.animateScore(score);
+
+        // 2. Missing Values
+        let totalMissing = 0;
+        if (result.quality_issues) {
+            const missingHeader = result.quality_issues.find(issue => issue.type === 'missing_header');
+            if (missingHeader) {
+                const match = missingHeader.message.match(/(\d+)/);
+                if (match) totalMissing = parseInt(match[0]);
+            }
+        }
+        this.animateCounter('stat-missing-count', totalMissing);
+        const missingPct = result.overview && result.overview.total_cells ? ((totalMissing / result.overview.total_cells) * 100).toFixed(1) : 0;
+        document.getElementById('stat-missing-label').textContent = totalMissing > 0 
+            ? `${missingPct}% of all cells are null` 
+            : 'Excellent, 100% complete dataset';
+
+        // 3. Outlier Analysis
+        let totalOutliers = 0;
+        if (result.quality_issues) {
+            result.quality_issues.forEach(issue => {
+                if (issue.type === 'outliers') {
+                    const match = issue.message.match(/(\d+)/);
+                    if (match) totalOutliers += parseInt(match[0]);
+                }
+            });
+        }
+        this.animateCounter('stat-outliers-count', totalOutliers);
+        document.getElementById('stat-outliers-label').textContent = totalOutliers > 0
+            ? `${totalOutliers} statistical anomalies detected`
+            : 'Statistical noise is minimal';
+
+        // 4. Duplicate Records
+        let duplicateRows = 0;
+        if (result.quality_issues) {
+            const dupIssue = result.quality_issues.find(issue => issue.type === 'duplicates');
+            if (dupIssue) {
+                const match = dupIssue.message.match(/(\d+)/);
+                if (match) duplicateRows = parseInt(match[0]);
+            }
+        }
+        this.animateCounter('stat-duplicates-count', duplicateRows);
+        document.getElementById('stat-duplicates-label').textContent = duplicateRows > 0
+            ? `${duplicateRows} redundant records detected`
+            : 'No duplicate records found';
+
+        // 5. Feature Engineering Suggestions
+        const featuresContainer = document.getElementById('features-list-content');
+        if (featuresContainer && result.overview) {
+            const suggestions = [];
+            if (result.overview.data_types) {
+                const hasDates = result.quality_issues && result.quality_issues.some(issue => issue.type === 'date_strings');
+                if (hasDates) {
+                    suggestions.push('📅 <strong>Temporal Parsing:</strong> Extract Year, Month, Day, and Weekend flag from date fields.');
+                }
+                
+                let numericCount = 0;
+                Object.entries(result.overview.data_types).forEach(([dtype, count]) => {
+                    if (dtype.includes('int') || dtype.includes('float')) numericCount += count;
+                });
+                if (numericCount > 0) {
+                    suggestions.push('⚡ <strong>Standard Scaling:</strong> Apply Min-Max scaling or Standard Z-Score scaling to numeric columns.');
+                }
+                
+                let objectCount = 0;
+                Object.entries(result.overview.data_types).forEach(([dtype, count]) => {
+                    if (dtype.includes('object') || dtype.includes('str')) objectCount += count;
+                });
+                if (objectCount > 2) {
+                    suggestions.push('🏷️ <strong>One-Hot Encoding:</strong> Encode categorical string columns for downstream machine learning.');
+                }
+            }
+            if (suggestions.length === 0) {
+                suggestions.push('✨ <strong>Domain Align:</strong> Align schema mapping standard column headers to normalize representation.');
+            }
+            featuresContainer.innerHTML = `
+                <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; color: var(--text-secondary);">
+                    ${suggestions.map(s => `<li style="padding: 8px; background: rgba(0, 102, 255, 0.03); border-radius: 6px; border-left: 3px solid var(--accent-primary);">${s}</li>`).join('')}
+                </ul>
+            `;
+        }
+
+        // 6. AI Insights (smart recommendations)
+        const insightsContainer = document.getElementById('ai-insights-content');
+        if (insightsContainer) {
+            if (result.recommendations && result.recommendations.length > 0) {
+                insightsContainer.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 10px; font-size: 0.85rem; color: var(--text-secondary);">
+                        ${result.recommendations.slice(0, 3).map(rec => `
+                            <div style="padding: 10px; background: rgba(124, 58, 237, 0.03); border-radius: 8px; border-left: 3px solid var(--accent-secondary);">
+                                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 2px;">${rec.title}</div>
+                                <div>${rec.reason}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                insightsContainer.innerHTML = `
+                    <div style="color: var(--success); font-weight: 500; font-size: 0.85rem;">
+                        ✅ AI Engine: No critical clean actions required! Overall data quality is high.
+                    </div>
+                `;
+            }
+        }
+    }
+
+    animateScore(targetScore) {
+        const fillCircle = document.getElementById('radial-fill');
+        const textVal = document.getElementById('score-text-val');
+        if (!fillCircle || !textVal) return;
+
+        // Animate counter text
+        this.animateCounter('score-text-val', targetScore);
+
+        // Animate progress circle dashoffset
+        // Circumference is 2 * pi * r = 2 * 3.14159 * 40 = 251.2
+        const circumference = 251.2;
+        const offset = circumference - (targetScore / 100) * circumference;
+        fillCircle.style.strokeDashoffset = offset;
+    }
+
+    animateCounter(elementId, targetValue) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+
+        let start = 0;
+        const duration = 1200; // ms
+        const startTime = performance.now();
+
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out quad
+            const ease = progress * (2 - progress);
+            const currentVal = Math.round(ease * targetValue);
+            
+            if (elementId.includes('score')) {
+                el.textContent = currentVal;
+            } else {
+                el.textContent = currentVal.toLocaleString();
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            } else {
+                el.textContent = targetValue.toLocaleString();
+            }
+        }
+
+        requestAnimationFrame(update);
     }
 }
 

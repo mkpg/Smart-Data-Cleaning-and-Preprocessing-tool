@@ -12,6 +12,19 @@
 </head>
 
 <body>
+    <div class="mesh-gradient-bg"></div>
+    <div class="floating-orb orb-violet"></div>
+    <div class="floating-orb orb-blue"></div>
+
+    <svg width="0" height="0" style="position: absolute;">
+      <defs>
+        <linearGradient id="score-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#0066FF" />
+          <stop offset="100%" stop-color="#7C3AED" />
+        </linearGradient>
+      </defs>
+    </svg>
+
     <!-- Consent Modal (blocks access until accepted) -->
     <div id="consent-modal" class="consent-modal">
         <div class="consent-modal-content">
@@ -175,7 +188,95 @@
 
                 <!-- Analysis Results -->
                 <div class="results-section">
-                    <h2 class="section-title">Dataset Analysis Results</h2>
+                    <h2 class="section-title" style="margin-top: 40px; margin-bottom: 10px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-primary);">AI Preprocessing Insights</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 0.95rem;">Real-time automated data validation, quality score gauge, anomaly detection, and schema alignment.</p>
+
+                    <!-- Bento Grid -->
+                    <div class="bento-grid">
+                        <!-- Card 1: Data Quality Score -->
+                        <div class="bento-card x-large" id="card-quality-score">
+                            <div class="card-header">
+                                <span class="card-title">Data Quality Score</span>
+                                <span class="card-subtitle">Overall integrity score across multiple dimensions</span>
+                            </div>
+                            <div class="card-content score-radial-container">
+                                <div class="radial-progress" id="radial-progress-score">
+                                    <svg viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="40" class="track"></circle>
+                                        <circle cx="50" cy="50" r="40" class="fill" id="radial-fill" style="stroke-dashoffset: 251.2;"></circle>
+                                    </svg>
+                                    <div class="radial-text">
+                                        <span id="score-text-val">--</span>
+                                        <span class="pct">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Missing Values Detection -->
+                        <div class="bento-card" id="card-missing-values">
+                            <div class="card-header">
+                                <span class="card-title">Missing Values</span>
+                                <span class="card-subtitle">Null or blank cells detected</span>
+                            </div>
+                            <div class="card-content stat-display">
+                                <div class="stat-number" id="stat-missing-count">0</div>
+                                <div class="stat-label" id="stat-missing-label">No missing values</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Outlier Analysis -->
+                        <div class="bento-card" id="card-outliers">
+                            <div class="card-header">
+                                <span class="card-title">Outliers Detected</span>
+                                <span class="card-subtitle">Statistical anomalies (>1.5 IQR)</span>
+                            </div>
+                            <div class="card-content stat-display">
+                                <div class="stat-number" id="stat-outliers-count">0</div>
+                                <div class="stat-label" id="stat-outliers-label">No outliers found</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Duplicate Records -->
+                        <div class="bento-card" id="card-duplicates">
+                            <div class="card-header">
+                                <span class="card-title">Duplicate Records</span>
+                                <span class="card-subtitle">Identical rows in the dataset</span>
+                            </div>
+                            <div class="card-content stat-display">
+                                <div class="stat-number" id="stat-duplicates-count">0</div>
+                                <div class="stat-label" id="stat-duplicates-label">No duplicate rows</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 5: Feature Engineering Suggestions -->
+                        <div class="bento-card large" id="card-feature-suggestions">
+                            <div class="card-header">
+                                <span class="card-title">Feature Suggestions</span>
+                                <span class="card-subtitle">AI recommended transformations & new variables</span>
+                            </div>
+                            <div class="card-content" id="features-list-content">
+                                <div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
+                                    Upload data to receive feature suggestions
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card 6: AI Insights -->
+                        <div class="bento-card x-large" id="card-ai-insights">
+                            <div class="card-header">
+                                <span class="card-title">AI Engine Insights</span>
+                                <span class="card-subtitle">Actionable suggestions to improve quality</span>
+                            </div>
+                            <div class="card-content" id="ai-insights-content" style="max-height: 280px; overflow-y: auto;">
+                                <div style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">
+                                    Upload data to receive AI insights
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 40px; margin-bottom: 20px; font-weight: 700; letter-spacing: -0.3px; color: var(--text-primary);">Detailed Data Reports</h3>
 
                     <!-- Dataset Overview -->
                     <div class="result-card">

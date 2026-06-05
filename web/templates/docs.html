@@ -1,26 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Medicl Documentation | Smart Data Preprocessing</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #050505;
-            --bg-sidebar: #0A0A0A;
-            --bg-card: #121214;
-            --accent-primary: #6366f1;
-            --accent-secondary: #d946ef;
-            --text-primary: #ffffff;
-            --text-secondary: #a1a1aa;
-            --text-muted: #71717a;
-            --border-color: rgba(255, 255, 255, 0.08);
-            --code-bg: #1e1e20;
+            --bg-primary: #F0F4FF;
+            --bg-sidebar: #E6ECF8;
+            --bg-card: #ffffff;
+            --accent-primary: #0066FF;
+            --accent-secondary: #00B4FF;
+            --accent-gradient: linear-gradient(135deg, #0066FF, #00B4FF);
+            --text-primary: #0D1B3E;
+            --text-secondary: #2E4A7A;
+            --text-muted: #6B82A8;
+            --border-color: rgba(0, 102, 255, 0.12);
+            --code-bg: #EAF0FF;
             --sidebar-width: 280px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -33,7 +41,9 @@
         /* Sidebar */
         .sidebar {
             position: fixed;
-            left: 0; top: 0; bottom: 0;
+            left: 0;
+            top: 0;
+            bottom: 0;
             width: var(--sidebar-width);
             background: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
@@ -45,7 +55,7 @@
         .sidebar-logo {
             font-size: 1.5rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #6366f1, #d946ef);
+            background: var(--accent-gradient);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -77,7 +87,7 @@
         }
 
         .nav-link:hover {
-            color: var(--text-primary);
+            color: var(--accent-primary);
         }
 
         .nav-link.active {
@@ -97,18 +107,43 @@
             margin-bottom: 4rem;
         }
 
-        h1 { font-size: 3rem; font-weight: 800; margin-bottom: 2rem; letter-spacing: -0.02em; }
-        h2 { font-size: 2rem; font-weight: 700; margin-bottom: 1.5rem; margin-top: 3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
-        h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; margin-top: 2rem; color: #818cf8; }
+        h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
 
-        p { margin-bottom: 1.25rem; color: var(--text-secondary); }
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            margin-top: 3rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            margin-top: 2rem;
+            color: var(--accent-primary);
+        }
+
+        p {
+            margin-bottom: 1.25rem;
+            color: var(--text-secondary);
+        }
 
         .tag {
             display: inline-block;
             padding: 0.2rem 0.6rem;
             border-radius: 4px;
-            background: rgba(99, 102, 241, 0.1);
-            color: #818cf8;
+            background: rgba(0, 102, 255, 0.08);
+            color: #0066FF;
             font-size: 0.75rem;
             font-weight: 600;
             margin-bottom: 1rem;
@@ -128,42 +163,48 @@
         code {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.9rem;
-            color: #e4e4e7;
+            color: var(--text-primary);
         }
 
         .copy-btn {
             position: absolute;
-            right: 1rem; top: 1rem;
-            background: rgba(255, 255, 255, 0.05);
+            right: 1rem;
+            top: 1rem;
+            background: rgba(0, 102, 255, 0.05);
             border: 1px solid var(--border-color);
             padding: 0.4rem 0.8rem;
             border-radius: 6px;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             font-size: 0.7rem;
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .copy-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
+        .copy-btn:hover {
+            background: rgba(0, 102, 255, 0.1);
+            color: var(--text-primary);
+        }
 
         /* Tables */
         table {
             width: 100%;
             border-collapse: collapse;
             margin: 2rem 0;
-            background: rgba(20, 20, 20, 0.5);
+            background: rgba(255, 255, 255, 0.6);
             border-radius: 12px;
             overflow: hidden;
+            border: 1px solid var(--border-color);
         }
 
-        th, td {
+        th,
+        td {
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
         }
 
         th {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(0, 102, 255, 0.03);
             font-weight: 600;
             color: var(--text-primary);
             font-size: 0.85rem;
@@ -181,19 +222,20 @@
             padding: 1.5rem;
             border-radius: 12px;
             border-left: 4px solid var(--accent-primary);
-            background: rgba(99, 102, 241, 0.05);
+            background: rgba(0, 102, 255, 0.04);
             margin: 2rem 0;
         }
 
         .callout.warning {
             border-left-color: #f59e0b;
-            background: rgba(245, 158, 11, 0.05);
+            background: rgba(245, 158, 11, 0.04);
         }
 
         .callout-title {
             font-weight: 700;
             margin-bottom: 0.5rem;
             font-size: 0.95rem;
+            color: var(--text-primary);
         }
 
         /* Operation Cards */
@@ -210,25 +252,52 @@
             padding: 1.5rem;
             border-radius: 16px;
             transition: transform 0.2s;
+            box-shadow: 0 10px 30px rgba(0, 60, 180, 0.03);
         }
 
-        .op-card:hover { border-color: var(--accent-primary); transform: translateY(-4px); }
-        .op-icon { font-size: 1.5rem; margin-bottom: 1rem; display: block; }
-        .op-title { font-weight: 700; margin-bottom: 0.5rem; display: block; }
-        .op-desc { font-size: 0.85rem; color: var(--text-secondary); }
+        .op-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(0, 102, 255, 0.08);
+        }
+
+        .op-icon {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .op-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: var(--text-primary);
+        }
+
+        .op-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
 
         /* Responsive */
         @media (max-width: 1024px) {
-            .main-content { margin-left: 0; padding: 2rem; }
-            .sidebar { display: none; }
+            .main-content {
+                margin-left: 0;
+                padding: 2rem;
+            }
+
+            .sidebar {
+                display: none;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <aside class="sidebar">
         <a href="/" class="sidebar-logo">Medicl.</a>
-        
+
         <nav>
             <div class="nav-group">
                 <div class="nav-group-title">User Guide</div>
@@ -237,7 +306,7 @@
                 <a href="#operations" class="nav-link">Cleaning Operations</a>
                 <a href="#strategies" class="nav-link">Execution Strategies</a>
             </div>
-            
+
             <div class="nav-group">
                 <div class="nav-group-title">API Reference</div>
                 <a href="#api-auth" class="nav-link">Authentication</a>
@@ -258,16 +327,19 @@
         <header>
             <span class="tag">Release v0.0.7</span>
             <h1>Knowledge Base</h1>
-            <p>Master the Medicl platform with our comprehensive guides for researchers, data scientists, and developers.</p>
+            <p>Master the Medicl platform with our comprehensive guides for researchers, data scientists, and
+                developers.</p>
         </header>
 
         <section id="getting-started">
             <h2>Getting Started</h2>
-            <p>Medicl is an advanced healthcare-centric data preprocessing platform designed to handle structured, semi-structured, and unstructured medical records with intelligent parsing and HIPAA-compliant redaction.</p>
-            
+            <p>Medicl is an advanced healthcare-centric data preprocessing platform designed to handle structured,
+                semi-structured, and unstructured medical records with intelligent parsing and HIPAA-compliant
+                redaction.</p>
+
             <h3>Installation</h3>
             <p>Run Medicl locally using Docker or standard Python environments.</p>
-            
+
             <div class="callout">
                 <div class="callout-title">Docker (Recommended)</div>
                 <p>The easiest way to get started is using Docker Compose.</p>
@@ -275,7 +347,8 @@
 # Open http://localhost:5000</code></pre>
             </div>
 
-            <div class="callout" style="border-left-color: var(--accent-secondary); background: rgba(217, 70, 239, 0.05);">
+            <div class="callout"
+                style="border-left-color: var(--accent-secondary); background: rgba(217, 70, 239, 0.05);">
                 <div class="callout-title">Local Python Setup</div>
                 <p>Ensure you have Python 3.10+ installed.</p>
                 <pre><button class="copy-btn">Copy</button><code>pip install -r requirements.txt
@@ -286,22 +359,25 @@ python server.py</code></pre>
         <section id="interface">
             <h2>Interface Overview</h2>
             <p>The Web UI is divided into three functional phases to guide you through the data cleaning process.</p>
-            
+
             <div class="ops-grid">
                 <div class="op-card">
                     <span class="op-icon">🔍</span>
                     <span class="op-title">Data Analysis</span>
-                    <p class="op-desc">Upload your dataset and get an immediate AI-powered quality report, missing value heatmaps, and schema mapping suggestions.</p>
+                    <p class="op-desc">Upload your dataset and get an immediate AI-powered quality report, missing value
+                        heatmaps, and schema mapping suggestions.</p>
                 </div>
                 <div class="op-card">
                     <span class="op-icon">⚙️</span>
                     <span class="op-title">Review & Adjust</span>
-                    <p class="op-desc">Fine-tune exactly which cleaning operations to perform. Toggle HIPAA redaction, outlier clipping, and medical code standardization.</p>
+                    <p class="op-desc">Fine-tune exactly which cleaning operations to perform. Toggle HIPAA redaction,
+                        outlier clipping, and medical code standardization.</p>
                 </div>
                 <div class="op-card">
                     <span class="op-icon">🚀</span>
                     <span class="op-title">Execute & Export</span>
-                    <p class="op-desc">Run the pipeline and view side-by-side "Before/After" metrics. Export your cleaned data in CSV, XLSX, JSON, or Parquet.</p>
+                    <p class="op-desc">Run the pipeline and view side-by-side "Before/After" metrics. Export your
+                        cleaned data in CSV, XLSX, JSON, or Parquet.</p>
                 </div>
             </div>
         </section>
@@ -309,7 +385,7 @@ python server.py</code></pre>
         <section id="operations">
             <h2>Cleaning Operations</h2>
             <p>Medicl provides 11 specialized operations tailored for medical and technical data cleaning.</p>
-            
+
             <div class="ops-grid">
                 <div class="op-card">
                     <span class="op-title">Smart Type Conversion</span>
@@ -321,7 +397,8 @@ python server.py</code></pre>
                 </div>
                 <div class="op-card">
                     <span class="op-title">ICD-10 Mapping</span>
-                    <p class="op-desc">Aligns clinical diagnoses with standard ICD-10 registry codes using fuzzy matching.</p>
+                    <p class="op-desc">Aligns clinical diagnoses with standard ICD-10 registry codes using fuzzy
+                        matching.</p>
                 </div>
                 <div class="op-card">
                     <span class="op-title">Outlier Handling</span>
@@ -331,17 +408,54 @@ python server.py</code></pre>
 
             <div class="callout warning">
                 <div class="callout-title">PHI Redaction Notice</div>
-                <p>While Medicl's PHI redaction is robust, it is provided on a best-effort basis. Always independently verify output before sharing sensitive clinical data.</p>
+                <p>While Medicl's PHI redaction is robust, it is provided on a best-effort basis. Always independently
+                    verify output before sharing sensitive clinical data.</p>
+            </div>
+        </section>
+
+        <section id="strategies">
+            <h2>Execution Strategies</h2>
+            <p>Medicl implements adaptive execution strategies to optimize performance and accuracy based on the incoming data format (structured vs. unstructured).</p>
+
+            <h3>Adaptive Unstructured PDF Pipeline</h3>
+            <p>For text files and clinical logs, Medicl runs a direct character-stream normalizer. For PDFs, it dynamically matches document formats using three parsing pathways:</p>
+
+            <div class="ops-grid">
+                <div class="op-card">
+                    <span class="op-icon">⚡</span>
+                    <span class="op-title">Fast Path (PyMuPDF)</span>
+                    <p class="op-desc">Automatically selected for digital-native PDFs with a clean text layer. Directly extracts strings in milliseconds.</p>
+                </div>
+                <div class="op-card">
+                    <span class="op-icon">📊</span>
+                    <span class="op-title">Layout Path (Docling)</span>
+                    <p class="op-desc">Invoked for scanned records with complex columns, text-tables, forms, and clinical headers, reconstructing structural layout.</p>
+                </div>
+                <div class="op-card">
+                    <span class="op-icon">👁️</span>
+                    <span class="op-title">OCR Fallback (Tesseract)</span>
+                    <p class="op-desc">Active for image-based documents and low-resolution clinical scans, running optical character recognition to extract medical texts.</p>
+                </div>
+            </div>
+
+            <h3>Structured Pipeline Sequencing</h3>
+            <p>By default, Medicl clean cycles execute in a secure sequence to resolve dependencies between cleaning steps (e.g. converting data types before handling missing values and anomalies):</p>
+            
+            <div class="callout">
+                <div class="callout-title">Standard Execution Order</div>
+                <p>1. Type Conversion &rarr; 2. Missing Value Imputation &rarr; 3. Duplication Resolution &rarr; 4. Outlier Clipping &rarr; 5. PHI Redaction &rarr; 6. Medical Code Mapping &rarr; 7. HIPAA Rule Validation.</p>
             </div>
         </section>
 
         <section id="api-reference">
             <h1>API Reference</h1>
-            <p>Our RESTful API allows you to integrate Medicl's cleaning pipeline into your own clinical workflows and applications.</p>
+            <p>Our RESTful API allows you to integrate Medicl's cleaning pipeline into your own clinical workflows and
+                applications.</p>
 
             <h3 id="api-auth">Authentication &amp; Sessions</h3>
-            <p>The API uses session-based tracking. A unique <code>session_id</code> (UUID v4) is created automatically when you upload a file and must be passed to all subsequent calls.</p>
-            
+            <p>The API uses session-based tracking. A unique <code>session_id</code> (UUID v4) is created automatically
+                when you upload a file and must be passed to all subsequent calls.</p>
+
             <h3 id="api-upload">Upload Endpoint</h3>
             <pre><button class="copy-btn">Copy</button><code>POST /api/upload
 Content-Type: multipart/form-data
@@ -362,7 +476,7 @@ Max size  : 50 MB</code></pre>
   "schema_mapping": { "domain": "healthcare", "suggestions": [ ... ] },
   "preview": { "rows": [ ... ], "total_rows": 5000 }
 }</code></pre>
-            
+
             <h4>Python Example</h4>
             <pre><button class="copy-btn">Copy</button><code>import requests
 
@@ -388,31 +502,89 @@ Content-Type: application/json</code></pre>
 
             <h4>All Supported Operations</h4>
             <table>
-                <tr><th>Key</th><th>Description</th><th>Extra Config</th></tr>
-                <tr><td><code>smart_type_conversion</code></td><td>Auto-detects and fixes data type mismatches in columns</td><td>—</td></tr>
-                <tr><td><code>handle_missing</code></td><td>Fills or drops missing values using a chosen strategy</td><td><code>"method": "auto" | "mean" | "median" | "mode" | "drop"</code></td></tr>
-                <tr><td><code>remove_duplicates</code></td><td>Removes fully duplicated rows</td><td>—</td></tr>
-                <tr><td><code>handle_outliers</code></td><td>Detects and caps/removes statistical outliers (Z-score / IQR)</td><td><code>"method": "cap" | "remove"</code></td></tr>
-                <tr><td><code>redact_phi</code></td><td>Redacts names, phones, emails &amp; IDs for HIPAA/GDPR compliance</td><td>—</td></tr>
-                <tr><td><code>standardize_codes</code></td><td>Maps diagnoses to ICD-10 codes; validates LOINC lab codes</td><td>—</td></tr>
-                <tr><td><code>validate_clinical</code></td><td>Checks clinical values are within medically plausible ranges</td><td>—</td></tr>
-                <tr><td><code>validate_ranges</code></td><td>Validates numeric columns against expected value ranges</td><td>—</td></tr>
-                <tr><td><code>normalize_clinical_text</code></td><td>Expands medical abbreviations and corrects common misspellings</td><td>—</td></tr>
-                <tr><td><code>clean_text</code></td><td>Strips special characters and normalises whitespace in text fields</td><td>—</td></tr>
-                <tr><td><code>remove_high_missing</code></td><td>Drops columns whose missing-value rate exceeds a threshold</td><td><code>"threshold": 0.5</code> (0–1 fraction)</td></tr>
-                <tr><td><code>feature_engineering</code></td><td>Derives new features (e.g. age buckets, date parts) automatically</td><td>—</td></tr>
-                <tr><td><code>ml_impute_missing</code></td><td>Uses a Random Forest model to impute missing values (requires scikit-learn)</td><td>—</td></tr>
+                <tr>
+                    <th>Key</th>
+                    <th>Description</th>
+                    <th>Extra Config</th>
+                </tr>
+                <tr>
+                    <td><code>smart_type_conversion</code></td>
+                    <td>Auto-detects and fixes data type mismatches in columns</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>handle_missing</code></td>
+                    <td>Fills or drops missing values using a chosen strategy</td>
+                    <td><code>"method": "auto" | "mean" | "median" | "mode" | "drop"</code></td>
+                </tr>
+                <tr>
+                    <td><code>remove_duplicates</code></td>
+                    <td>Removes fully duplicated rows</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>handle_outliers</code></td>
+                    <td>Detects and caps/removes statistical outliers (Z-score / IQR)</td>
+                    <td><code>"method": "cap" | "remove"</code></td>
+                </tr>
+                <tr>
+                    <td><code>redact_phi</code></td>
+                    <td>Redacts names, phones, emails &amp; IDs for HIPAA/GDPR compliance</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>standardize_codes</code></td>
+                    <td>Maps diagnoses to ICD-10 codes; validates LOINC lab codes</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>validate_clinical</code></td>
+                    <td>Checks clinical values are within medically plausible ranges</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>validate_ranges</code></td>
+                    <td>Validates numeric columns against expected value ranges</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>normalize_clinical_text</code></td>
+                    <td>Expands medical abbreviations and corrects common misspellings</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>clean_text</code></td>
+                    <td>Strips special characters and normalises whitespace in text fields</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>remove_high_missing</code></td>
+                    <td>Drops columns whose missing-value rate exceeds a threshold</td>
+                    <td><code>"threshold": 0.5</code> (0–1 fraction)</td>
+                </tr>
+                <tr>
+                    <td><code>feature_engineering</code></td>
+                    <td>Derives new features (e.g. age buckets, date parts) automatically</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>ml_impute_missing</code></td>
+                    <td>Uses a Random Forest model to impute missing values (requires scikit-learn)</td>
+                    <td>—</td>
+                </tr>
             </table>
 
             <h3 id="api-export">Export Endpoint</h3>
-            <p>Retrieve the cleaned data as a CSV file once processing is complete. If no cleaning has been run yet, the original uploaded data is returned.</p>
+            <p>Retrieve the cleaned data as a CSV file once processing is complete. If no cleaning has been run yet, the
+                original uploaded data is returned.</p>
             <pre><button class="copy-btn">Copy</button><code>GET /api/export/{session_id}
 
 Response: text/csv  (attachment; filename=cleaned_data.csv)</code></pre>
 
             <div class="callout warning">
                 <div class="callout-title">Export Format</div>
-                <p>The export endpoint always returns <strong>CSV</strong>. Call <code>/api/execute</code> first; if you call export before executing any operations, the original unmodified data is returned.</p>
+                <p>The export endpoint always returns <strong>CSV</strong>. Call <code>/api/execute</code> first; if you
+                    call export before executing any operations, the original unmodified data is returned.</p>
             </div>
 
             <h4>Python Example</h4>
@@ -445,7 +617,8 @@ with open('cleaned_output.csv', 'wb') as f:
             </table>
         </section>
 
-        <footer style="margin-top: 8rem; border-top: 1px solid var(--border-color); padding-top: 2rem; color: var(--text-muted); font-size: 0.85rem;">
+        <footer
+            style="margin-top: 8rem; border-top: 1px solid var(--border-color); padding-top: 2rem; color: var(--text-muted); font-size: 0.85rem;">
             &copy; 2026 Medicl Healthcare AI Platform. All rights reserved.
         </footer>
     </main>
@@ -481,6 +654,6 @@ with open('cleaned_output.csv', 'wb') as f:
                 setTimeout(() => btn.innerText = 'Copy', 2000);
             });
         });
-    </aside>
-</body>
-</html>
+    </aside >
+</body >
+</html >
