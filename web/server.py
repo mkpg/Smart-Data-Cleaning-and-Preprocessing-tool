@@ -6,20 +6,39 @@ Supports: CSV, Excel, JSON, and XML files
 All 11 cleaning operations from v0.0.7 are fully wired.
 """
 
+import logging
+import time
+import threading
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import pandas as pd
 import numpy as np
 import os
 import re
 import json
 import copy
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET   # SECURITY: safe XML parser (prevents XXE)
 from datetime import datetime
 from difflib import SequenceMatcher
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import uuid
+
+# Configure logging before anything else
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+try:
+    import magic as _magic
+    MAGIC_AVAILABLE = True
+except ImportError:
+    MAGIC_AVAILABLE = False
+    logger.warning("python-magic not available — file magic byte validation disabled")
 
 try:
     from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
@@ -51,13 +70,46 @@ try:
 except ImportError:
     PHASE5_AVAILABLE = False
 
-# Store unstructured processing results in memory
+# ─── In-memory stores ────────────────────────────────────────────────────────
 unstructured_store = {}
 review_workflows = {}
+_session_timestamps = {}   # tracks when each session was created for TTL cleanup
 
+# ─── App init ────────────────────────────────────────────────────────────────
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
-CORS(app)
+
+# CRIT-01: SECRET_KEY must come from environment — never generated at runtime
+_secret_key = os.environ.get('SECRET_KEY')
+if not _secret_key:
+    if os.environ.get('FLASK_ENV') == 'production':
+        raise RuntimeError(
+            "SECRET_KEY environment variable is not set. "
+            "Set it in your Render dashboard under Environment Variables."
+        )
+    # Development fallback only — not used in production
+    logger.warning("SECRET_KEY not set — using insecure dev key. Set SECRET_KEY in production!")
+    _secret_key = 'dev-insecure-key-do-not-use-in-production'
+app.secret_key = _secret_key
+
+# LOW-03: Secure session cookie flags
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['SESSION_COOKIE_NAME'] = 'sdc_session'
+
+# CRIT-02: Restrict CORS to configured origins only
+_cors_origins_raw = os.environ.get('CORS_ORIGINS', 'http://localhost:5000')
+_cors_origins = [o.strip() for o in _cors_origins_raw.split(',') if o.strip()]
+CORS(app, origins=_cors_origins, supports_credentials=True)
+logger.info(f"CORS allowed origins: {_cors_origins}")
+
+# HIGH-06: Rate limiting — in-memory storage, no Redis needed (Render-safe)
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["500 per day", "100 per hour"],
+    storage_uri="memory://",
+)
 
 # Configure upload folder
 UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
@@ -74,6 +126,20 @@ def handle_exception(e):
         "name": e.name
     }), e.code
 
+@app.errorhandler(Exception)
+def handle_generic_exception(e):
+    """Catch all unhandled Python exceptions and return them as JSON instead of HTML."""
+    logger.error(f"Unhandled Exception: {str(e)}", exc_info=True)
+    return jsonify({
+        "error": f"Internal Server Error: {str(e)}",
+        "code": 500,
+        "name": "Internal Server Error"
+    }), 500
+
+# HIGH-01: Wire up the security module (was defined but never called)
+from security import setup_security
+setup_security(app)
+
 # Configure inputs folder (all sample/demo data files)
 INPUT_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'inputs')
 os.makedirs(INPUT_FOLDER, exist_ok=True)
@@ -82,6 +148,101 @@ app.config['INPUT_FOLDER'] = INPUT_FOLDER
 # Store data in memory for the session
 data_store = {}
 lineage_store = {}
+
+# HIGH-03: Session TTL — evict sessions older than 2 hours to prevent memory exhaustion
+SESSION_TTL_SECONDS = int(os.environ.get('SESSION_TTL_SECONDS', 7200))  # 2 hours default
+
+def _cleanup_old_sessions():
+    """Background thread: remove expired sessions from all in-memory stores."""
+    while True:
+        time.sleep(300)  # run every 5 minutes
+        try:
+            now = time.time()
+            expired = [
+                sid for sid, ts in list(_session_timestamps.items())
+                if now - ts > SESSION_TTL_SECONDS
+            ]
+            for sid in expired:
+                data_store.pop(sid, None)
+                data_store.pop(f'{sid}_cleaned', None)
+                lineage_store.pop(sid, None)
+                unstructured_store.pop(sid, None)
+                review_workflows.pop(sid, None)
+                _session_timestamps.pop(sid, None)
+            if expired:
+                logger.info(f"Session cleanup: evicted {len(expired)} expired sessions")
+        except Exception as exc:
+            logger.exception(f"Session cleanup error: {exc}")
+
+_cleanup_thread = threading.Thread(target=_cleanup_old_sessions, daemon=True)
+_cleanup_thread.start()
+
+
+# ─── Security helpers ───────────────────────────────────────────────────────
+
+def _register_session(session_id: str):
+    """CRIT-04: Bind a new session_id to the caller's Flask session cookie."""
+    if 'owned_sessions' not in session:
+        session['owned_sessions'] = []
+    session['owned_sessions'].append(session_id)
+    session.modified = True
+    _session_timestamps[session_id] = time.time()
+
+
+def _check_ownership(session_id: str):
+    """CRIT-04: Return 403 response if the session_id is not owned by this user.
+    Returns None if access is permitted, or a (response, status) tuple if denied."""
+    owned = session.get('owned_sessions', [])
+    if session_id not in owned:
+        logger.warning(
+            f"IDOR attempt: session {session_id[:8]}... accessed by "
+            f"non-owner from {request.remote_addr}"
+        )
+        return jsonify({'error': 'Access denied'}), 403
+    return None
+
+
+# CRIT-03: Allowed MIME types per extension (for magic byte validation)
+_ALLOWED_MIME = {
+    'csv':  ['text/csv', 'text/plain', 'application/csv', 'application/octet-stream'],
+    'xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+             'application/zip', 'application/octet-stream'],
+    'xls':  ['application/vnd.ms-excel', 'application/octet-stream'],
+    'json': ['application/json', 'text/plain', 'text/json'],
+    'xml':  ['application/xml', 'text/xml', 'text/plain'],
+    'txt':  ['text/plain'],
+    'log':  ['text/plain'],
+    'md':   ['text/plain', 'text/markdown', 'text/x-markdown'],
+    'pdf':  ['application/pdf'],
+    'rtf':  ['text/rtf', 'application/rtf', 'text/plain'],
+    'dat':  ['text/plain', 'application/octet-stream'],
+}
+
+def _validate_file_magic(file_obj, ext: str) -> bool:
+    """Validate file magic bytes match the declared extension. Returns True if valid."""
+    if not MAGIC_AVAILABLE:
+        return True  # Skip validation gracefully if python-magic not installed
+    try:
+        header = file_obj.read(2048)
+        file_obj.seek(0)
+        detected = _magic.from_buffer(header, mime=True)
+        allowed = _ALLOWED_MIME.get(ext, [])
+        if allowed and detected not in allowed:
+            logger.warning(f"Magic byte mismatch: .{ext} file detected as {detected}")
+            return False
+        return True
+    except Exception:
+        file_obj.seek(0)
+        return True  # Fail open on magic detection error (don't block legitimate files)
+
+
+def _sanitize_csv_cell(val):
+    """MED-03: Prevent CSV formula injection by prefixing dangerous leading characters."""
+    if isinstance(val, str) and val and val[0] in ('=', '+', '-', '@', '\t', '\r'):
+        return "'" + val
+    return val
+
+
 
 STANDARD_SCHEMAS = {
     'healthcare': {
@@ -996,6 +1157,7 @@ def documentation():
 
 
 @app.route('/api/upload', methods=['POST'])
+@limiter.limit("10 per minute")   # HIGH-06: rate limit file uploads
 def upload_file():
     """Handle file upload and analysis (supports CSV, Excel, JSON, XML)"""
     if 'file' not in request.files:
@@ -1007,6 +1169,11 @@ def upload_file():
     
     filename = secure_filename(file.filename)
     file_ext = filename.rsplit('.', 1)[-1].lower() if '.' in filename else ''
+    
+    # CRIT-03: Validate file magic bytes before parsing
+    if not _validate_file_magic(file, file_ext):
+        logger.warning(f"Rejected upload: magic byte mismatch for '{filename}' from {request.remote_addr}")
+        return jsonify({'error': 'File content does not match its extension. Please upload a valid file.'}), 400
     
     try:
         # Parse file based on extension
@@ -1052,6 +1219,7 @@ def upload_file():
                 'metadata': metadata,
                 'is_unstructured': True
             }
+            _register_session(session_id)  # CRIT-04: bind to caller's session
             
             return jsonify({
                 'success': True,
@@ -1095,6 +1263,7 @@ def upload_file():
             'filename': filename,
             'transformations': []
         }
+        _register_session(session_id)  # CRIT-04: bind to caller's session
         
         # Analyze the data
         analyzer = DataAnalyzer(data)
@@ -1119,22 +1288,22 @@ def upload_file():
             'schema_mapping': schema_mapping
         })
     
-    except json.JSONDecodeError as e:
-        return jsonify({'error': f'Invalid JSON format: {str(e)}'}), 400
+    except json.JSONDecodeError:
+        return jsonify({'error': 'Invalid JSON format. Please check your file.'}), 400
     
-    except ET.ParseError as e:
-        return jsonify({'error': f'Invalid XML format: {str(e)}'}), 400
+    except ET.ParseError:
+        return jsonify({'error': 'Invalid XML format. Please check your file.'}), 400
     
-    except Exception as e:
-        return jsonify({'error': f'Error processing file: {str(e)}'}), 400
-    
-    except Exception as e:
-        return jsonify({'error': f'Failed to process file: {str(e)}'}), 500
+    except Exception as exc:
+        logger.exception(f"File upload error from {request.remote_addr}: {exc}")
+        return jsonify({'error': 'File processing failed. Please check your file format and try again.'}), 500
 
 
 @app.route('/api/columns/<session_id>')
 def get_columns(session_id):
     """Get column information for a session"""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     if session_id not in data_store:
         return jsonify({'error': 'Session not found'}), 404
     
@@ -1155,6 +1324,8 @@ def get_columns(session_id):
 @app.route('/api/schema-map/<session_id>')
 def get_schema_mapping(session_id):
     """Get AI-powered schema mapping suggestions for a session."""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     if session_id not in data_store:
         return jsonify({'error': 'Session not found'}), 404
 
@@ -1166,6 +1337,8 @@ def get_schema_mapping(session_id):
 @app.route('/api/lineage/<session_id>')
 def get_lineage(session_id):
     """Return lineage information for latest cleaning run."""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     if session_id not in lineage_store:
         return jsonify({'error': 'Lineage not found for session'}), 404
     return jsonify({'success': True, 'lineage': lineage_store[session_id]})
@@ -1190,6 +1363,7 @@ def load_demo_dataset():
         'filename': 'demo_healthcare_dataset.csv',
         'transformations': []
     }
+    _register_session(session_id)  # CRIT-04: bind demo session to caller
 
     analyzer = DataAnalyzer(demo_data)
     schema_mapper = IntelligentSchemaMapper(STANDARD_SCHEMAS)
@@ -2105,13 +2279,22 @@ class DataCleaner:
 
 
 @app.route('/api/execute', methods=['POST'])
+@limiter.limit("5 per minute")   # HIGH-06: rate limit CPU-heavy cleaning
 def execute_cleaning():
     """Execute cleaning operations on the dataset (Unified)"""
+    if not request.is_json:   # MED-02: enforce JSON content type
+        return jsonify({'error': 'Content-Type must be application/json'}), 415
     data_json = request.get_json()
+    if not data_json:
+        return jsonify({'error': 'Invalid or empty request body'}), 400
     
     session_id = data_json.get('session_id')
     operations = data_json.get('operations', {})
     operation_sequence = data_json.get('operation_sequence', [])
+    
+    # CRIT-04: Ownership check before doing anything
+    denied = _check_ownership(session_id) if session_id else None
+    if denied: return denied
     
     # Handle Unstructured Data
     if session_id in unstructured_store:
@@ -2148,8 +2331,9 @@ def execute_cleaning():
                     'clinical_count': len(result.get('clinical_values', {}))
                 }
             })
-        except Exception as e:
-            return jsonify({'error': f'Unstructured processing failed: {str(e)}'}), 500
+        except Exception as exc:
+            logger.exception(f"Unstructured processing error: {exc}")
+            return jsonify({'error': 'Unstructured processing failed. Please try again.'}), 500
 
     if not session_id or session_id not in data_store:
         return jsonify({'error': 'Session not found. Please upload a file first.'}), 404
@@ -2172,36 +2356,43 @@ def execute_cleaning():
         
         return jsonify(results)
     
-    except Exception as e:
-        return jsonify({'error': f'Cleaning failed: {str(e)}'}), 500
+    except Exception as exc:
+        logger.exception(f"Cleaning error for session {str(session_id)[:8]}: {exc}")
+        return jsonify({'error': 'Cleaning failed. Please check your configuration and try again.'}), 500
 
 
 @app.route('/api/export/<session_id>')
+@limiter.limit("30 per minute")   # HIGH-06
 def export_data(session_id):
     """Export cleaned data as CSV"""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     cleaned_key = f'{session_id}_cleaned'
     if cleaned_key not in data_store:
         if session_id not in data_store:
             return jsonify({'error': 'Session not found'}), 404
-        # If no cleaning done, export original
         data = data_store[session_id]
     else:
         data = data_store[cleaned_key]
     
-    csv_data = data.to_csv(index=False)
-    return csv_data, 200, {'Content-Type': 'text/csv', 'Content-Disposition': 'attachment; filename=cleaned_data.csv'}
+    # MED-03: Sanitize cell values to prevent CSV formula injection
+    safe_df = data.applymap(_sanitize_csv_cell)
+    csv_data = safe_df.to_csv(index=False)
+    return csv_data, 200, {
+        'Content-Type': 'text/csv',
+        'Content-Disposition': 'attachment; filename="cleaned_data.csv"'
+    }
 
 
 @app.route('/api/export/unstructured/<session_id>')
 def export_unstructured_data(session_id):
     """Export cleaned unstructured data and extracted entities as JSON"""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     if session_id not in unstructured_store:
         return jsonify({'error': 'Session not found or no unstructured data processed'}), 404
         
     data = unstructured_store[session_id]
-    
-    # We don't want to export the entire raw text if we don't need to, 
-    # but the user wants the extracted JSON data
     export_payload = {
         'metadata': data.get('metadata', {}),
         'phi_findings': data.get('phi_findings', []),
@@ -2209,29 +2400,34 @@ def export_unstructured_data(session_id):
         'sections': data.get('sections', []),
         'processed_at': data.get('processed_at', None)
     }
-    
+    # MED-04: filename in Content-Disposition must be sanitized
+    safe_name = re.sub(r'[^\w\-]', '_', session_id[:8])
     return jsonify(export_payload), 200, {
         'Content-Type': 'application/json',
-        'Content-Disposition': f'attachment; filename=unstructured_extraction_{session_id[:8]}.json'
+        'Content-Disposition': f'attachment; filename="extraction_{safe_name}.json"'
     }
 
 
 @app.route('/api/export/lineage/<session_id>')
 def export_lineage(session_id):
     """Export lineage report as JSON file."""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     if session_id not in lineage_store:
         return jsonify({'error': 'Lineage not found'}), 404
 
     payload = json.dumps(lineage_store[session_id], indent=2)
     return payload, 200, {
         'Content-Type': 'application/json',
-        'Content-Disposition': 'attachment; filename=lineage_report.json'
+        'Content-Disposition': 'attachment; filename="lineage_report.json"'
     }
 
 
 @app.route('/api/visualize/meta/<session_id>')
 def visualize_meta(session_id):
     """Get column metadata for visualization field panel"""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     # Check for cleaned data first, fallback to original
     cleaned_key = f'{session_id}_cleaned'
     has_cleaned = cleaned_key in data_store
@@ -2306,9 +2502,11 @@ def visualize_meta(session_id):
 @app.route('/api/visualize/data/<session_id>', methods=['POST'])
 def visualize_data(session_id):
     """Get column data for chart rendering"""
-    req = request.get_json()
-    source = req.get('source', 'cleaned')  # 'original' or 'cleaned'
-    columns = req.get('columns', [])       # list of column names to fetch
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
+    req = request.get_json() or {}
+    source = req.get('source', 'cleaned')
+    columns = req.get('columns', [])
     
     # Pick data source
     key = f'{session_id}_cleaned' if source == 'cleaned' else session_id
@@ -2350,9 +2548,11 @@ def visualize_data(session_id):
 @app.route('/api/visualize/stats/<session_id>', methods=['POST'])
 def visualize_stats(session_id):
     """Get summary statistics for a column"""
-    req = request.get_json()
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
+    req = request.get_json() or {}
     source = req.get('source', 'cleaned')
-    column = req.get('column', '')
+    column = str(req.get('column', ''))[:200]  # sanitize column name length
     
     key = f'{session_id}_cleaned' if source == 'cleaned' and f'{session_id}_cleaned' in data_store else session_id
     if key not in data_store:
@@ -2385,6 +2585,8 @@ def visualize_stats(session_id):
 @app.route('/api/comparison/<session_id>')
 def get_comparison_data(session_id):
     """Get before/after comparison data for split-screen mode."""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     original_key = session_id
     cleaned_key = f'{session_id}_cleaned'
     
@@ -2431,6 +2633,7 @@ def get_comparison_data(session_id):
 # ─────────────────────────────────────────────────────────────────────────────
 
 @app.route('/api/unstructured/upload', methods=['POST'])
+@limiter.limit("10 per minute")   # HIGH-06
 def upload_unstructured():
     """Upload and process unstructured text files (TXT, LOG, PDF, MD)."""
     if not UNSTRUCTURED_AVAILABLE:
@@ -2494,6 +2697,8 @@ def upload_unstructured():
             'stored_at': datetime.now().isoformat(),
         }
 
+        _register_session(session_id)  # CRIT-04: bind to caller's session
+
         if REVIEW_WORKFLOW_AVAILABLE:
             review_workflows[session_id] = ReviewWorkflow(
                 store_path=os.path.join(app.config['UPLOAD_FOLDER'], 'review_store', session_id)
@@ -2507,29 +2712,33 @@ def upload_unstructured():
 
         return jsonify(result)
 
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-    except Exception as e:
-        return jsonify({'error': f'Processing failed: {str(e)}'}), 500
+    except ValueError as exc:
+        return jsonify({'error': str(exc)}), 400
+    except Exception as exc:
+        logger.exception(f"Unstructured upload error: {exc}")
+        return jsonify({'error': 'Processing failed. Please check your file and try again.'}), 500
 
 
 @app.route('/api/unstructured/export/<session_id>')
 def export_unstructured(session_id):
     """Export cleaned unstructured text as a downloadable file."""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     if session_id not in unstructured_store:
         return jsonify({'error': 'Session not found or expired'}), 404
 
     data = unstructured_store[session_id]
     cleaned_text = data['cleaned_text']
-    original_name = data['metadata'].get('filename', 'cleaned_output')
-    base_name = os.path.splitext(original_name)[0]
+    # MED-04: sanitize filename before placing in Content-Disposition header
+    raw_name = data['metadata'].get('filename', 'cleaned_output')
+    safe_base = secure_filename(os.path.splitext(raw_name)[0]) or 'cleaned_output'
 
     from flask import Response
     return Response(
         cleaned_text,
         mimetype='text/plain',
         headers={
-            'Content-Disposition': f'attachment; filename="{base_name}_cleaned.txt"'
+            'Content-Disposition': f'attachment; filename="{safe_base}_cleaned.txt"'
         }
     )
 
@@ -2548,11 +2757,14 @@ def load_unstructured_demo():
         'md': 'sample_clinical_trial.md',
     }
 
-    demo_filename = demo_files.get(demo_type, 'sample_medical_notes.txt')
+    # MED-06: demo_type must be in the allowed dict — no path info in errors
+    demo_filename = demo_files.get(demo_type)
+    if not demo_filename:
+        return jsonify({'error': 'Invalid demo type. Choose: txt, log, or md.'}), 400
     demo_path = os.path.join(app.config['INPUT_FOLDER'], demo_filename)
 
     if not os.path.exists(demo_path):
-        return jsonify({'error': f'Demo file not found: {demo_filename}'}), 404
+        return jsonify({'error': 'Demo file not available. Please upload your own file.'}), 404
 
     try:
         processor = UnstructuredDataProcessor()
@@ -2577,6 +2789,7 @@ def load_unstructured_demo():
             'quality_report': result.get('quality_report', {}),
             'stored_at': datetime.now().isoformat(),
         }
+        _register_session(session_id)  # CRIT-04: bind demo session to caller
 
         if REVIEW_WORKFLOW_AVAILABLE:
             review_workflows[session_id] = ReviewWorkflow(
@@ -2589,13 +2802,16 @@ def load_unstructured_demo():
 
         return jsonify(result)
 
-    except Exception as e:
-        return jsonify({'error': f'Demo loading failed: {str(e)}'}), 500
+    except Exception as exc:
+        logger.exception(f"Demo load error: {exc}")
+        return jsonify({'error': 'Demo loading failed. Please try again.'}), 500
 
 
 @app.route('/api/unstructured/review/summary/<session_id>')
 def unstructured_review_summary(session_id):
     """Return reviewer workflow summary for a processed unstructured session."""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     if session_id not in unstructured_store:
         return jsonify({'error': 'Session not found or expired'}), 404
     if not REVIEW_WORKFLOW_AVAILABLE:
@@ -2645,11 +2861,15 @@ def unstructured_review_decision():
     payload = request.get_json(silent=True) or {}
     session_id = payload.get('session_id')
     entry_id = payload.get('entry_id')
-    reviewer_name = payload.get('reviewer_name', 'reviewer')
+    # MED-01: sanitize reviewer_name — strip to 100 chars, alphanumeric + spaces only
+    raw_reviewer = str(payload.get('reviewer_name', 'reviewer'))
+    reviewer_name = re.sub(r'[^\w\s\-\.]', '', raw_reviewer)[:100].strip() or 'reviewer'
     decision = payload.get('decision')
     modified_payload = payload.get('modified_payload')
-    notes = payload.get('notes', '')
+    notes = str(payload.get('notes', ''))[:2000]  # cap notes length
 
+    denied = _check_ownership(session_id) if session_id else None  # CRIT-04
+    if denied: return denied
     if not session_id or session_id not in unstructured_store:
         return jsonify({'error': 'Invalid or missing session_id'}), 400
     if not entry_id:
@@ -2680,6 +2900,8 @@ def unstructured_review_decision():
 @app.route('/api/unstructured/review/export/<session_id>')
 def unstructured_review_export(session_id):
     """Export reviewed entries with audit trail for compliance."""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     if session_id not in unstructured_store:
         return jsonify({'error': 'Session not found or expired'}), 404
     if not REVIEW_WORKFLOW_AVAILABLE:
@@ -2699,15 +2921,22 @@ def unstructured_review_export(session_id):
 @app.route('/api/unstructured/production/export_audit/<session_id>', methods=['POST'])
 def unstructured_export_audit_package(session_id):
     """Phase 5 endpoint: export compliance audit package for a session."""
+    denied = _check_ownership(session_id)  # CRIT-04
+    if denied: return denied
     if session_id not in unstructured_store:
         return jsonify({'error': 'Session not found or expired'}), 404
     if not (PHASE5_AVAILABLE and REVIEW_WORKFLOW_AVAILABLE):
         return jsonify({'error': 'Phase 5 or review workflow modules are not available'}), 501
 
     body = request.get_json(silent=True) or {}
-    output_dir = body.get('output_dir')
-    if not output_dir:
-        output_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'audit_exports', session_id)
+    # HIGH-05: NEVER accept output_dir from user — always compute server-side
+    output_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'audit_exports', session_id)
+    # Validate no path traversal
+    real_output = os.path.realpath(output_dir)
+    real_base = os.path.realpath(app.config['UPLOAD_FOLDER'])
+    if not real_output.startswith(real_base):
+        logger.warning(f"Path traversal attempt in audit export from {request.remote_addr}")
+        return jsonify({'error': 'Invalid path'}), 400
 
     os.makedirs(output_dir, exist_ok=True)
     logger_obj = StructuredLogger(log_file=os.path.join(output_dir, 'phase5_audit.log'))
@@ -2784,15 +3013,20 @@ except ImportError:
 
 
 @app.route('/health')
+@limiter.exempt   # health check should never be rate-limited
 def health_check():
     """Health check endpoint for Render / load balancers."""
-    return jsonify({'status': 'ok', 'version': 'v0.0.7'}), 200
+    # LOW-04: Do not expose version or internal details
+    return jsonify({'status': 'ok'}), 200
 
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
+    # INFO-04: never allow debug=True in production
     debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
-    print(f"Starting Smart Data Cleaner Web Server on port {port}...")
-    print(f"Access locally at http://localhost:{port}")
+    if debug and os.environ.get('FLASK_ENV') == 'production':
+        logger.critical("FLASK_DEBUG=true in production is NOT allowed. Forcing debug=False.")
+        debug = False
+    logger.info(f"Starting Smart Data Cleaner Web Server on port {port} (debug={debug})")
     app.run(debug=debug, host='0.0.0.0', port=port)
 

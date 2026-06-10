@@ -13,11 +13,11 @@ class VizDashboard {
         this.chartCounter = 0;
         this.plotlyTheme = {
             paper_bgcolor: 'rgba(0,0,0,0)',
-            plot_bgcolor: 'rgba(15,15,25,0.5)',
-            font: { family: 'Inter, sans-serif', color: '#c8ccd4', size: 12 },
+            plot_bgcolor: 'rgba(248, 249, 255, 0.7)',
+            font: { family: 'Inter, sans-serif', color: '#374151', size: 12 },
             colorway: ['#6366f1', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4', '#f43f5e', '#84cc16', '#a78bfa', '#fb923c'],
-            xaxis: { gridcolor: 'rgba(255,255,255,0.06)', zerolinecolor: 'rgba(255,255,255,0.1)' },
-            yaxis: { gridcolor: 'rgba(255,255,255,0.06)', zerolinecolor: 'rgba(255,255,255,0.1)' },
+            xaxis: { gridcolor: 'rgba(99, 102, 241, 0.1)', zerolinecolor: 'rgba(99, 102, 241, 0.2)', tickfont: { color: '#6b7280' } },
+            yaxis: { gridcolor: 'rgba(99, 102, 241, 0.1)', zerolinecolor: 'rgba(99, 102, 241, 0.2)', tickfont: { color: '#6b7280' } },
             margin: { t: 40, r: 20, b: 50, l: 60 },
         };
         this.initElements();
@@ -383,10 +383,10 @@ class VizDashboard {
             type: 'pie', hole: 0.4,
             marker: { colors: this.plotlyTheme.colorway },
             textinfo: 'label+percent', textposition: 'outside',
-            textfont: { color: '#c8ccd4', size: 11 }
+            textfont: { color: '#374151', size: 11 }
         }], {
             ...this.plotlyTheme, title: '', showlegend: sorted.length <= 8,
-            legend: { font: { color: '#c8ccd4', size: 10 } },
+            legend: { font: { color: '#374151', size: 10 } },
             margin: { t: 20, r: 20, b: 30, l: 20 }
         },
             { responsive: true });

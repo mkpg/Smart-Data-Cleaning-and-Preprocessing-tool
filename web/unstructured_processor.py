@@ -27,8 +27,8 @@ PYMUPDF_AVAILABLE = False
 try:
     from docling.document_converter import DocumentConverter
     DOCLING_AVAILABLE = True
-except ImportError:
-    logger.info("Docling not installed â€“ PDF extraction will use fallback")
+except (ImportError, OSError) as e:
+    logger.info(f"Docling not installed or failed to load (error: {e}) - PDF extraction will use fallback")
 
 try:
     import pytesseract

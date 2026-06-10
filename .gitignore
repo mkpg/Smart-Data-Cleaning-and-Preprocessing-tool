@@ -49,3 +49,6 @@ desktop.ini
 *.log
 !inputs/*.log
 !inputs/*.txt
+
+# ─── Unused / Retired Files ──────────────────────────────
+unwanter folder/

@@ -33,3 +33,8 @@ python-dotenv==1.0.0
 
 # ── Production Server ───────────────────────────────────────
 gunicorn==21.2.0
+
+# ── Security ─────────────────────────────────────────────────
+Flask-Limiter==3.5.0         # Rate limiting (in-memory, no Redis needed)
+defusedxml==0.7.1            # Safe XML parsing (prevents XXE, Billion Laughs)
+python-magic==0.4.27         # File magic byte validation (libmagic1 in Dockerfile)

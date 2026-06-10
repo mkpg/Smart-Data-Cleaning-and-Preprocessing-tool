@@ -1421,13 +1421,19 @@ body {
 }
 
 .export-btn.secondary {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.85);
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+    color: #6366f1;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.35), 0 4px 15px rgba(99, 102, 241, 0.1);
 }
 
 .export-btn.secondary:hover {
-    border-color: var(--accent-primary);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.2);
+    background: rgba(255, 255, 255, 0.95);
+    color: #7c3aed;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.55), 0 6px 20px rgba(99, 102, 241, 0.25);
+    transform: translateY(-2px);
 }
 
 /* ============================================
@@ -1748,16 +1754,19 @@ body {
 }
 
 .viz-chart-wrapper {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(99, 102, 241, 0.15);
     border-radius: var(--border-radius);
     overflow: hidden;
     transition: var(--transition);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.06);
 }
 
 .viz-chart-wrapper:hover {
     border-color: rgba(99, 102, 241, 0.3);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.12);
 }
 
 .viz-chart-wrapper.viz-chart-filtered {
@@ -1781,8 +1790,8 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.02);
-    border-bottom: 1px solid var(--border-color);
+    background: rgba(99, 102, 241, 0.04);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
 }
 
 .viz-chart-title {
