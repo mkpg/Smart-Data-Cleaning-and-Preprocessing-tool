@@ -1,0 +1,38 @@
+2025-01-10 08:15:32 [INFO] EMR-SYSTEM: Patient check-in initiated | MRN: 123456789 | Name: John Doe | DOB: 1965-03-15
+2025-01-10 08:15:33 [INFO] EMR-SYSTEM: Insurance verified | Policy: BCBS-IL-9876543 | Group: GRP-44521
+2025-01-10 08:16:01 [INFO] TRIAGE: Vitals recorded | BP: 165/95 | HR: 102 | RR: 22 | Temp: 98.6F | SpO2: 94%
+2025-01-10 08:16:15 [WARN] TRIAGE: CRITICAL - SpO2 below 95% threshold | Patient: John Doe | MRN: 123456789
+2025-01-10 08:16:20 [WARN] TRIAGE: CRITICAL - BP systolic above 160 threshold | Patient: John Doe
+2025-01-10 08:17:00 [INFO] TRIAGE: Pain assessment | Location: chest, substernal | Severity: 8/10 | Onset: 2hrs ago
+2025-01-10 08:17:30 [INFO] EMR-SYSTEM: Triage priority assigned: LEVEL-2 (Emergency) | MRN: 123456789
+2025-01-10 08:18:00 [INFO] LAB-ORDER: STAT orders placed | Troponin, BNP, CBC, BMP | Provider: Dr. Sarah Johnson | NPI: 1234567890
+2025-01-10 08:18:05 [INFO] PHARMACY: Medication reconciliation started | Patient SSN: ***-**-9012
+2025-01-10 08:20:00 [INFO] RADIOLOGY: Chest X-ray ordered | Priority: STAT | MRN: 123456789
+2025-01-10 08:25:00 [INFO] EMR-SYSTEM: 12-lead ECG completed | Interpretation: ST depression in leads V3-V6
+2025-01-10 08:30:00 [INFO] LAB-RESULT: Troponin I: 2.4 ng/mL [H] | Reference: <0.04 ng/mL | MRN: 123456789
+2025-01-10 08:30:05 [ALERT] LAB-RESULT: CRITICAL VALUE - Troponin elevated | Notifying attending physician
+2025-01-10 08:31:00 [INFO] LAB-RESULT: BNP: 450 pg/mL [H] | Reference: <100 pg/mL
+2025-01-10 08:31:30 [INFO] LAB-RESULT: Glucose: 245 mg/dL [H] | Reference: 70-100 mg/dL
+2025-01-10 08:32:00 [INFO] CONSULT: Cardiology consult requested | Reason: NSTEMI | Dr. Johnson -> Dr. Patel
+2025-01-10 08:35:00 [INFO] PHARMACY: Heparin drip initiated | 18 units/kg/hr | Weight: 95kg | MRN: 123456789
+2025-01-10 08:35:30 [INFO] PHARMACY: Aspirin 325mg PO administered | Patient: John Doe
+2025-01-10 08:36:00 [INFO] PHARMACY: Clopidogrel 300mg PO loading dose | Patient: John Doe
+2025-01-10 08:40:00 [INFO] RADIOLOGY: Chest X-ray resulted | Findings: Mild cardiomegaly, no acute infiltrates
+2025-01-10 09:00:00 [INFO] CONSULT: Cardiology accepted | Dr. Raj Patel | Plan: Cardiac catheterization tomorrow AM
+2025-01-10 09:15:00 [INFO] NURSING: Patient assessment | Alert, oriented x4 | Pain 6/10 improving | O2 2L NC -> SpO2 97%
+2025-01-10 10:00:00 [INFO] EMR-SYSTEM: Admission order placed | Unit: CCU | Room: 4-312 | Attending: Dr. Johnson
+2025-01-10 10:05:00 [INFO] PHARMACY: Insulin sliding scale ordered | Glucose monitoring q4h
+2025-01-10 12:00:00 [INFO] NURSING: Pain reassessment | 4/10 | Vitals: BP 142/88 HR 88 RR 18 SpO2 97%
+2025-01-10 14:00:00 [INFO] LAB-RESULT: HbA1c: 8.2% [H] | Reference: <5.7% | Indicates poor glycemic control
+2025-01-10 16:00:00 [INFO] CONSULT: Endocrinology consult requested | Reason: Uncontrolled DM2, HbA1c 8.2%
+2025-01-10 18:00:00 [INFO] NURSING: Evening assessment | Patient resting comfortably | CP resolved | Diet: cardiac/diabetic
+2025-01-11 06:00:00 [INFO] LAB-ORDER: Pre-cath labs | PT/INR, aPTT, BMP, Troponin | MRN: 123456789
+2025-01-11 07:00:00 [INFO] LAB-RESULT: Troponin trending down: 1.8 ng/mL | Previous: 2.4
+2025-01-11 08:00:00 [INFO] PROCEDURE: Cardiac catheterization started | Dr. Patel | Room: Cath Lab 2
+2025-01-11 09:30:00 [INFO] PROCEDURE: Cath completed | Findings: 70% LAD stenosis, 50% RCA | PCI to LAD with DES x1
+2025-01-11 10:00:00 [INFO] POST-PROC: Patient stable | Groin site hemostasis achieved | Monitoring initiated
+2025-01-15 10:00:00 [INFO] DISCHARGE: Discharge order entered | Dr. Johnson | MRN: 123456789
+2025-01-15 10:30:00 [INFO] PHARMACY: Discharge medications reconciled | 8 medications | Patient counseled
+2025-01-15 11:00:00 [INFO] EMR-SYSTEM: Discharge summary completed | Follow-up appointments scheduled
+2025-01-15 11:30:00 [INFO] BILLING: Claim generated | DRG: 282 | ICD-10: I21.4, E11.65, I10 | CPT: 92928
+2025-01-15 12:00:00 [INFO] EMR-SYSTEM: Patient discharged | MRN: 123456789 | LOS: 5 days | Disposition: Home

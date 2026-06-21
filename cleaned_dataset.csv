@@ -1,0 +1,11 @@
+SNo,Confirmed,Confirmed_was_missing,Confirmed_was_missing_encoded
+1,10.0,False,0
+2,20.0,False,0
+3,60.0,True,1
+4,40.0,False,0
+5,50.0,False,0
+6,60.0,False,0
+7,70.0,False,0
+8,80.0,False,0
+9,90.0,False,0
+10,100.0,False,0

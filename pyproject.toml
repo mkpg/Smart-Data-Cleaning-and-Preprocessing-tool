@@ -19,5 +19,6 @@ dependencies = [
     "defusedxml==0.7.1",
     "python-magic==0.4.27"
 ]
+
 [tool.vercel]
 entrypoint = "web.server:app"
