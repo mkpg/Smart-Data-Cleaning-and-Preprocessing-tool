@@ -455,20 +455,41 @@
 
             if (Array.isArray(values)) {
                 for (const v of values) {
-                    if (v.systolic !== undefined) {
-                        html += `<div class="clinical-value-item">${v.systolic}/${v.diastolic} mmHg</div>`;
-                    } else if (v.value !== undefined) {
-                        html += `<div class="clinical-value-item">${v.value}</div>`;
-                    } else {
+                    if (v === null || v === undefined) {
+                        continue;
+                    } else if (typeof v !== 'object') {
+                        // Plain scalar (string / number)
                         html += `<div class="clinical-value-item">${escapeHTML(String(v))}</div>`;
+                    } else if (v.systolic !== undefined && v.diastolic !== undefined) {
+                        // Blood pressure reading
+                        html += `<div class="clinical-value-item">${escapeHTML(String(v.systolic))}/${escapeHTML(String(v.diastolic))} mmHg</div>`;
+                    } else if (v.value !== undefined) {
+                        // Generic measurement with optional unit
+                        const unit = v.unit ? ` ${escapeHTML(String(v.unit))}` : '';
+                        html += `<div class="clinical-value-item">${escapeHTML(String(v.value))}${unit}</div>`;
+                    } else if (v.concept !== undefined && v.matched_text !== undefined) {
+                        // P2 FIX: corpus_mentions shape {concept, matched_text, position}
+                        html += `<div class="clinical-value-item">${escapeHTML(String(v.matched_text))}</div>`;
+                    } else if (v.matched_text !== undefined) {
+                        html += `<div class="clinical-value-item">${escapeHTML(String(v.matched_text))}</div>`;
+                    } else {
+                        // Fallback: render all non-position fields
+                        const parts = Object.entries(v)
+                            .filter(([k]) => k !== 'position' && k !== 'start' && k !== 'end')
+                            .map(([k, val]) => `${escapeHTML(k)}: ${escapeHTML(String(val ?? ''))}`)
+                            .join(', ');
+                        html += `<div class="clinical-value-item">${parts || '&mdash;'}</div>`;
                     }
                 }
-            } else if (typeof values === 'object') {
+            } else if (values !== null && typeof values === 'object') {
                 for (const [k, v] of Object.entries(values)) {
-                    html += `<div class="clinical-value-item">${escapeHTML(k)}: ${escapeHTML(String(v))}</div>`;
+                    const displayVal = (v !== null && typeof v === 'object')
+                        ? JSON.stringify(v)
+                        : String(v ?? '');
+                    html += `<div class="clinical-value-item">${escapeHTML(k)}: ${escapeHTML(displayVal)}</div>`;
                 }
             } else {
-                html += `<div class="clinical-value-item">${escapeHTML(String(values))}</div>`;
+                html += `<div class="clinical-value-item">${escapeHTML(String(values ?? ''))}</div>`;
             }
 
             html += '</div>';

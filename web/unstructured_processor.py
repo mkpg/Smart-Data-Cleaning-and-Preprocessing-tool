@@ -117,7 +117,13 @@ PHI_PATTERNS = {
         'risk_level': 'CRITICAL'
     },
     'PATIENT_NAME': {
-        'pattern': r'\b(?:Patient|Name|patient|name)[:\s]+([A-Z][a-z]+\s+[A-Z][a-z]+)\b',
+        # P0 FIX: Extended to match abbreviated first names (e.g. 'S. Ibrahim', 'J. Smith')
+        # and all common prefix forms ('Patient:', 'Name:', 'Pt:', 'Pt Name:', 'Patient Name:').
+        'pattern': (
+            r'\b(?:Patient\s*Name|Patient|Pt\.?\s*Name|Pt\.?|Name)'
+            r'[:\s]+'
+            r'([A-Z][a-z]*\.?\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)'
+        ),
         'description': 'Patient Name',
         'hipaa_category': 'Names',
         'risk_level': 'HIGH'
@@ -1715,8 +1721,27 @@ class UnstructuredDataProcessor:
         return report
 
     def extract_sections(self, text: str) -> List[dict]:
-        """Identify and extract sections/headings from clinical documents."""
+        """Identify and extract sections/headings from clinical documents.
+
+        P2 FIX: Added minimum-length guard to prevent ordinary short all-caps
+        words (e.g. CSV table headers like 'TYPE', 'MEDICAID', 'STATUS') from
+        being classified as document section headings.  A line is only treated
+        as a heading when either:
+          a) It matches a known clinical section keyword, OR
+          b) The pattern match spans at least 2 space-separated words.
+        This prevents single all-caps tokens on their own lines (which arise
+        from PDF table extraction) from consuming all subsequent content.
+        """
         sections = []
+
+        # Known clinical section keywords that are valid even as single words
+        _CLINICAL_HEADINGS = {
+            'assessment', 'plan', 'medications', 'allergies', 'history',
+            'examination', 'findings', 'impression', 'disposition', 'diagnosis',
+            'diagnoses', 'problem', 'complaints', 'hpi', 'ros', 'vitals',
+            'labs', 'imaging', 'procedures', 'summary', 'discharge',
+            'admission', 'subjective', 'objective', 'review', 'narrative',
+        }
 
         heading_patterns = [
             r'^(#{1,6})\s+(.+)$',
@@ -1735,15 +1760,25 @@ class UnstructuredDataProcessor:
             for pattern in heading_patterns:
                 match = re.match(pattern, line.strip())
                 if match:
+                    heading_text = match.group(2) if match.lastindex and match.lastindex >= 2 else match.group(1)
+                    heading_clean = heading_text.strip()
+
+                    # P2 FIX: Reject single-word all-caps headings unless they
+                    # are a known clinical keyword.
+                    word_count = len(heading_clean.split())
+                    is_known_keyword = heading_clean.lower() in _CLINICAL_HEADINGS
+                    if word_count < 2 and not is_known_keyword:
+                        # Do NOT treat this line as a section heading
+                        break
+
                     if current_section:
                         current_section['content'] = '\n'.join(current_content).strip()
                         current_section['word_count'] = len(current_section['content'].split())
                         sections.append(current_section)
 
-                    heading_text = match.group(2) if match.lastindex >= 2 else match.group(1)
                     current_section = {
                         'section_id': f"SEC-{len(sections) + 1:03d}",
-                        'heading': heading_text.strip(),
+                        'heading': heading_clean,
                         'line_start': i + 1,
                         'content': '',
                         'word_count': 0

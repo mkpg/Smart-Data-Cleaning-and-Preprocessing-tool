@@ -583,8 +583,42 @@ def load_xml_file(filepath):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+# ---------------------------------------------------------------------------
+# P1 FIX: Schema token exclusion list.
+# Columns whose names contain these tokens must NOT be mapped to a target that
+# does NOT also share the token.  This blocks blood_type→blood_pressure,
+# test_name→patient_name, test_date→admission_date, etc.
+# ---------------------------------------------------------------------------
+_SCHEMA_EXCLUSIVE_TOKENS: list = [
+    'type',       # blood_type ≠ blood_pressure
+    'test',       # test_name ≠ patient_name
+    'insurance',  # insurance_type ≠ patient fields
+    'department', # department_name ≠ patient_name
+    'diagnosis',  # diagnosis_name ≠ patient_name
+    'status',
+    'code',
+    'count',
+    'rate',
+    'score',
+    'flag',
+    'result',
+    'category',
+    'class',
+]
+
 class IntelligentSchemaMapper:
-    """Suggest standard schema mappings using fuzzy string matching and aliases."""
+    """Suggest standard schema mappings using string similarity and semantic checks.
+
+    P1 FIX: Raised minimum confidence threshold to 0.75 (was 0.62) and added
+    semantic token exclusion to prevent clearly incorrect mappings such as
+    blood_type→blood_pressure and test_name→patient_name.
+    A false mapping is worse than no mapping, so uncertain results are
+    returned as REVIEW_REQUIRED instead of a confident wrong answer.
+    """
+
+    # Minimum SequenceMatcher ratio required to emit a suggestion.
+    # Raised from 0.62 to 0.75 to reduce false-positives.
+    _MIN_CONFIDENCE: float = 0.75
 
     def __init__(self, schemas: dict):
         self.schemas = schemas
@@ -592,6 +626,27 @@ class IntelligentSchemaMapper:
     @staticmethod
     def _normalize(text: str) -> str:
         return re.sub(r'[^a-z0-9]+', '_', str(text).lower()).strip('_')
+
+    @staticmethod
+    def _tokens(norm: str) -> set:
+        """Return the set of underscore-separated tokens from a normalised name."""
+        return set(t for t in norm.split('_') if t)
+
+    def _is_semantically_compatible(self, source_norm: str, target_norm: str) -> bool:
+        """Return False when an exclusive token in the source is absent from
+        the target, signalling an incompatible concept mapping.
+
+        Example: source='blood_type', target='blood_pressure'
+          source has token 'type'; target does NOT → incompatible → return False.
+        Example: source='test_name', target='patient_name'
+          source has token 'test'; target does NOT → incompatible → return False.
+        """
+        source_tokens = self._tokens(source_norm)
+        target_tokens = self._tokens(target_norm)
+        for excl in _SCHEMA_EXCLUSIVE_TOKENS:
+            if excl in source_tokens and excl not in target_tokens:
+                return False
+        return True
 
     def detect_domain(self, columns: list) -> str:
         column_text = ' '.join([self._normalize(col) for col in columns])
@@ -612,25 +667,43 @@ class IntelligentSchemaMapper:
             best_reason = 'No close match found'
 
             for target, aliases in domain_schema.items():
-                candidates = [target] + aliases
-                for candidate in candidates:
-                    candidate_norm = self._normalize(candidate)
-                    score = SequenceMatcher(None, source_norm, candidate_norm).ratio()
+                target_norm = self._normalize(target)
+                candidates = [(target, target_norm)] + [
+                    (a, self._normalize(a)) for a in aliases
+                ]
+                for candidate_label, candidate_norm in candidates:
+                    # P1 FIX: semantic compatibility check BEFORE scoring
+                    if not self._is_semantically_compatible(source_norm, candidate_norm):
+                        continue
+                    # Also check compatibility against the canonical target name
+                    if not self._is_semantically_compatible(source_norm, target_norm):
+                        continue
 
+                    score = SequenceMatcher(None, source_norm, candidate_norm).ratio()
                     if source_norm == candidate_norm:
                         score = 1.0
 
                     if score > best_score:
                         best_score = score
                         best_target = target
-                        best_reason = f"Matched with '{candidate}'"
+                        best_reason = f"Matched with '{candidate_label}' (score={score:.2f})"
 
-            if best_target and best_score >= 0.62:
+            # P1 FIX: Only emit if confidence is high enough to be trustworthy.
+            # Low-confidence suggestions are worse than no suggestion.
+            if best_target and best_score >= self._MIN_CONFIDENCE:
                 suggestions.append({
                     'source': source_col,
                     'suggested': best_target,
                     'confidence': round(best_score, 2),
                     'reason': best_reason
+                })
+            elif best_target and best_score >= 0.62:
+                # Ambiguous match — flag for human review instead of asserting correctness
+                suggestions.append({
+                    'source': source_col,
+                    'suggested': 'REVIEW_REQUIRED',
+                    'confidence': round(best_score, 2),
+                    'reason': f"Low confidence match to '{best_target}' — manual review recommended"
                 })
 
         suggestions.sort(key=lambda x: x['confidence'], reverse=True)
@@ -705,8 +778,19 @@ class DataAnalyzer:
         return series.str.contains(r'[^\w\s]', na=False).any()
     
     def get_quality_issues(self) -> list:
-        """Analyze data quality issues"""
+        """Analyse data quality issues.
+
+        P1 FIX: Outlier detection now uses IQR 1.5× (same algorithm used by
+        DataCleaner.handle_outliers) instead of Z-score >3.  Also excludes
+        engineered/derived columns so the scan stays consistent with what the
+        pipeline actually treats as outliers.
+        """
         issues = []
+        # P1 FIX: suffixes that mark engineered/derived columns — exclude from outlier scan
+        _ENGINEERED_SUFFIXES = (
+            '_binned', '_log', '_encoded', '_length', '_word_count',
+            '_year', '_month', '_day', '_dayofweek', '_age', '_domain',
+        )
         
         # Data type issues
         for column in self.data.columns:
@@ -788,8 +872,8 @@ class DataAnalyzer:
             if col_data.dtype == 'object' and self.has_potential_dates(col_data):
                 col_issues.append('potential date strings')
             
-            # Outliers for numeric columns
-            if pd.api.types.is_numeric_dtype(col_data):
+            # P1 FIX: Outliers — IQR 1.5× only for non-engineered numeric columns
+            if pd.api.types.is_numeric_dtype(col_data) and not column.endswith(_ENGINEERED_SUFFIXES):
                 Q1 = col_data.quantile(0.25)
                 Q3 = col_data.quantile(0.75)
                 IQR = Q3 - Q1
@@ -800,7 +884,7 @@ class DataAnalyzer:
                             'type': 'outliers',
                             'icon': '❌',
                             'column': column,
-                            'message': f'{len(outliers)} outliers'
+                            'message': f'{len(outliers)} outliers (IQR method)'
                         })
             
             if col_issues:
@@ -1732,68 +1816,185 @@ class DataCleaner:
     # ──────────────────────────────────────────────
     # 8. REDACT PHI (Enhanced)
     # ──────────────────────────────────────────────
+    # ─── P0: Columns that are NEVER PHI regardless of their name ──────────────
+    # These tokens in a column name mean the column holds medical concepts
+    # (test names, diagnosis names, department names, etc.) NOT patient identity.
+    _NON_PHI_COLUMN_TOKENS: set = {
+        'test', 'diagnosis', 'department', 'insurance', 'procedure',
+        'medication', 'drug', 'treatment', 'condition', 'disease',
+        'type', 'category', 'code', 'status', 'result', 'flag',
+        'score', 'count', 'rate', 'value', 'unit', 'class',
+    }
+
+    # Columns whose EXACT normalised name is a known PHI field
+    _EXACT_PHI_COLUMN_NAMES: set = {
+        'patient_name', 'pt_name', 'full_name', 'first_name', 'last_name',
+        'name',  # only when it is the sole/primary identifier column
+        'patient_id', 'pt_id', 'pid', 'mrn', 'medical_record_number', 'uhid',
+        'dob', 'date_of_birth', 'birth_date',
+        'ssn', 'social_security', 'social_security_number',
+        'aadhaar', 'aadhar', 'uid',
+        'phone', 'mobile', 'contact', 'telephone', 'cell',
+        'email', 'e_mail', 'email_address',
+        'address', 'street_address', 'home_address',
+        'zip', 'pincode', 'postal_code',
+        'insurance_id', 'policy_number', 'beneficiary_id',
+        'hospital_id',
+    }
+
+    def _is_phi_column(self, col_name: str) -> bool:
+        """Return True only when we are confident the column holds patient-identifying
+        information.  Two conditions are checked:
+
+        1. The normalised column name is in the known-exact PHI set, OR
+        2. The column name contains a PHI-adjacent keyword AND does NOT
+           contain a non-PHI-concept token that overrides it.
+
+        P0 FIX: Prevents test_name, diagnosis_name, department_name, insurance_type
+        etc. from being mis-classified as PHI columns.
+        """
+        norm = re.sub(r'[^a-z0-9]+', '_', col_name.lower()).strip('_')
+        tokens = set(norm.split('_'))
+
+        # Exact match — always PHI
+        if norm in self._EXACT_PHI_COLUMN_NAMES:
+            return True
+
+        # If ANY non-PHI concept token is present, it overrides weak keyword signals
+        if tokens & self._NON_PHI_COLUMN_TOKENS:
+            return False
+
+        # Weak keyword signal — only accept if the name looks like a raw identifier
+        phi_adjacent_keywords = {
+            'name', 'id', 'number', 'phone', 'mobile', 'email',
+            'address', 'ssn', 'dob', 'mrn', 'aadhaar', 'aadhar',
+        }
+        return bool(tokens & phi_adjacent_keywords)
+
     def redact_phi(self):
-        """Auto-redact Protected Health Information
-        Detects and masks: emails, phones (US + India), Aadhaar numbers,
-        SSNs, hospital/MRN IDs, names, and addresses.
+        """Auto-redact Protected Health Information.
+
+        P0 FIX — Three-stage approach:
+        Stage 1: Column-name classification (semantic, not substring-only).
+        Stage 2: Value-pattern redaction for text columns.
+        Stage 3: Mandatory post-redaction verification re-scan of final data.
+
+        Redacted columns: emails, phones (US + India), Aadhaar numbers,
+        SSNs, hospital/MRN IDs, actual PHI-identity columns.
+
+        Columns preserved (not redacted based on name alone):
+          test_name, diagnosis_name, department_name, insurance_type, etc.
         """
         phi_patterns = {
-            'email': r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
-            'phone': r'(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}',
-            'phone_in': r'\b[6-9]\d{9}\b',  # Indian 10-digit mobile
-            'phone_in_spaced': r'\b[6-9]\d{4}[\s-]\d{5}\b',  # Indian spaced format
-            'ssn': r'\b\d{3}-\d{2}-\d{4}\b',
-            'aadhaar': r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}\b',  # Indian Aadhaar (12-digit)
-            'hospital_id': r'\b(?:MRN|HID|PAT|UHID)[-.\s]?\d{4,10}\b',  # Hospital IDs like MRN-12345
+            'email':          r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b',
+            'phone':          r'(?<!\d)(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}(?!\d)',
+            'phone_in':       r'\b[6-9]\d{9}\b',
+            'phone_in_spaced':r'\b[6-9]\d{4}[\s-]\d{5}\b',
+            'ssn':            r'\b\d{3}-\d{2}-\d{4}\b',
+            'aadhaar':        r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}\b',
+            'hospital_id':    r'\b(?:MRN|HID|PAT|UHID)[-.\s]?\d{4,10}\b',
         }
-        
-        # Extended column-name keywords for PHI detection
-        phi_column_keywords = [
-            'name', 'patient_name', 'first_name', 'last_name', 'full_name',
-            'address', 'street', 'city', 'zip', 'pincode', 'postal',
-            'phone', 'mobile', 'contact', 'telephone', 'cell',
-            'email', 'e_mail', 'email_address',
-            'ssn', 'social_security', 'aadhaar', 'aadhar', 'uid',
-            'mrn', 'patient_id', 'medical_record', 'uhid', 'hospital_id',
-            'dob', 'date_of_birth', 'birth_date',
-            'insurance_id', 'policy_number', 'beneficiary',
-        ]
-        
-        total_redacted = 0
-        
-        for col in self.data.columns:
+
+        phi_detected = 0
+        phi_redacted = 0
+        phi_column_log = []
+        phi_pattern_log = []
+
+        for col in list(self.data.columns):
             col_lower = col.lower().replace(' ', '_')
-            
-            # Column-name based redaction (catches obvious PHI columns)
-            if any(kw in col_lower for kw in phi_column_keywords):
-                original_count = self.data[col].notna().sum()
+
+            # ── Stage 1: Semantic column-name classification ──────────────
+            if self._is_phi_column(col):
+                original_count = int(self.data[col].notna().sum())
+                phi_detected += original_count
                 self.data[col] = '[REDACTED_PHI]'
-                total_redacted += int(original_count)
-                self.operations_performed.append(
+                phi_redacted += original_count
+                phi_column_log.append(
                     {'icon': '🔒', 'text': f'Redacted PHI column: {col} ({original_count} values)'}
                 )
                 continue
-            
-            # Pattern-based redaction on text columns
+
+            # ── Stage 2: Pattern-based redaction on text values ───────────
             if self.data[col].dtype == 'object':
                 col_str = self.data[col].astype(str)
                 for pattern_name, pattern in phi_patterns.items():
-                    matches = col_str.str.contains(pattern, na=False, flags=re.IGNORECASE)
+                    # P0 FIX: Use pre-compiled regex + apply() to avoid the
+                    # Pandas UserWarning triggered by capture groups in str.contains.
+                    _compiled = re.compile(pattern, re.IGNORECASE)
+                    matches = col_str.apply(lambda x: bool(_compiled.search(x)))
                     match_count = int(matches.sum())
                     if match_count > 0:
+                        phi_detected += match_count
                         self.data[col] = col_str.str.replace(
-                            pattern, f'[REDACTED_{pattern_name.upper()}]', regex=True, flags=re.IGNORECASE
+                            pattern,
+                            f'[REDACTED_{pattern_name.upper()}]',
+                            regex=True,
+                            flags=re.IGNORECASE
                         )
-                        col_str = self.data[col].astype(str)  # refresh for next pattern
-                        total_redacted += match_count
-                        self.operations_performed.append(
-                            {'icon': '🔒', 'text': f'Redacted {match_count} {pattern_name} patterns in {col}'}
+                        col_str = self.data[col].astype(str)
+                        phi_redacted += match_count
+                        phi_pattern_log.append(
+                            {'icon': '🔒',
+                             'text': f'Redacted {match_count} {pattern_name} in {col}'}
                         )
-        
-        if total_redacted > 0:
-            self.operations_performed.append(
-                {'icon': '✅', 'text': f'Total PHI redactions: {total_redacted} values protected'}
-            )
+
+        # ── Stage 3: Mandatory post-redaction verification re-scan ────────
+        # Scan the FINAL data for any residual PHI patterns.
+        residual_phi = 0
+        residual_details = []
+        verification_status = 'NOT_RUN'
+        try:
+            for col in self.data.columns:
+                if self.data[col].dtype != 'object':
+                    continue
+                col_str = self.data[col].astype(str)
+                for pattern_name, pattern in phi_patterns.items():
+                    # P0 FIX: Use compiled regex to avoid capture-group warning
+                    compiled = re.compile(pattern, re.IGNORECASE)
+                    still_present = col_str.apply(lambda x: bool(compiled.search(x)))
+                    count = int(still_present.sum())
+                    if count > 0:
+                        residual_phi += count
+                        residual_details.append(
+                            f'{pattern_name} in column {col} ({count} cells)'
+                        )
+            verification_status = 'PASSED' if residual_phi == 0 else 'FAILED'
+        except Exception as _ve:
+            verification_status = 'REVIEW_REQUIRED'
+            logger.warning(f'PHI verification scan error: {_ve}')
+
+        # Determine privacy status (fail-closed)
+        if verification_status == 'PASSED':
+            privacy_status = 'CLEAN'
+        elif verification_status == 'FAILED':
+            privacy_status = 'FAILED'
+        else:
+            privacy_status = 'REVIEW_REQUIRED'
+
+        # Record individual operations first, then the summary
+        self.operations_performed.extend(phi_column_log)
+        self.operations_performed.extend(phi_pattern_log)
+
+        # Store verification result so generate_validation_report() can access it
+        self._phi_verification = {
+            'phi_detected': phi_detected,
+            'phi_redacted': phi_redacted,
+            'residual_phi': residual_phi,
+            'residual_details': residual_details,
+            'verification': verification_status,
+            'privacy_status': privacy_status,
+        }
+
+        if phi_detected > 0 or residual_phi > 0:
+            self.operations_performed.append({
+                'icon': '✅' if verification_status == 'PASSED' else '⚠️',
+                'text': (
+                    f'PHI summary — detected: {phi_detected}, '
+                    f'redacted: {phi_redacted}, '
+                    f'residual: {residual_phi}, '
+                    f'verification: {verification_status}'
+                )
+            })
     
     # ──────────────────────────────────────────────
     # 9. VALIDATE CLINICAL RANGES
@@ -2081,11 +2282,57 @@ class DataCleaner:
     # VALIDATION REPORT GENERATOR
     # ──────────────────────────────────────────────
     def generate_validation_report(self, before_scores: dict, after_scores: dict) -> dict:
-        """Generate a structured JSON validation report summarizing all cleaning actions.
-        Parses self.operations_performed to extract counts per category."""
+        """Generate a structured JSON validation report summarising all cleaning actions.
+
+        P0 FIX — PHI counts are now taken directly from the structured
+        self._phi_verification dict written by redact_phi(), not by
+        re-parsing the free-text operations log.  This eliminates the
+        double-counting that occurred when the summary op matched the same
+        regex patterns as the per-column ops.
+
+        P1 FIX — Privacy status is reported as a *separate* dimension so a
+        high data-quality score cannot hide a PHI failure.
+        """
+        # ── P0: Read authoritative PHI metrics directly ──────────────────
+        phi_meta = getattr(self, '_phi_verification', None)
+        if phi_meta is not None:
+            phi_detected  = phi_meta['phi_detected']
+            phi_redacted  = phi_meta['phi_redacted']
+            residual_phi  = phi_meta['residual_phi']
+            verification  = phi_meta['verification']
+            privacy_status = phi_meta['privacy_status']
+            residual_details = phi_meta.get('residual_details', [])
+        else:
+            # redact_phi was not run — verification was not executed
+            phi_detected  = 0
+            phi_redacted  = 0
+            residual_phi  = 0
+            verification  = 'NOT_RUN'
+            privacy_status = 'REVIEW_REQUIRED'
+            residual_details = []
+
         report = {
             'total_operations': len(self.operations_performed),
-            'phi_redactions': {'total': 0},
+            # P0: authoritative, non-double-counted PHI metrics
+            'phi_redactions': {
+                'phi_detected': phi_detected,
+                'phi_redacted': phi_redacted,
+                'residual_phi': residual_phi,
+                'residual_details': residual_details,
+                'verification': verification,
+            },
+            # P1: separate privacy dimension — never hidden by data quality score
+            'privacy_status': privacy_status,
+            'privacy_warning': (
+                None if privacy_status == 'CLEAN'
+                else (
+                    f'PHI verification {verification}. '
+                    f'Residual PHI detected: {residual_phi} instance(s). '
+                    'Manual review required.'
+                    if privacy_status == 'FAILED'
+                    else 'PHI verification could not be completed. Manual review required.'
+                )
+            ),
             'type_conversions': {'date_columns': 0, 'numeric_columns': 0},
             'missing_values_handled': 0,
             'duplicates_removed': 0,
@@ -2098,40 +2345,35 @@ class DataCleaner:
                 'after': after_scores.get('overall', 0)
             }
         }
-        
+
+        # Parse the remaining non-PHI operations from the log.
+        # PHI ops are intentionally skipped here to avoid double-counting.
         for op in self.operations_performed:
             text = op.get('text', '')
             text_lower = text.lower()
-            
-            # PHI Redactions
-            if 'redact' in text_lower or 'phi' in text_lower:
-                import re as _re
-                count_match = _re.search(r'(\d+)', text)
-                count = int(count_match.group(1)) if count_match else 1
-                report['phi_redactions']['total'] += count
-                # Try to identify the PHI type from the text
-                for phi_type in ['ssn', 'email', 'phone', 'aadhaar', 'mrn', 'address', 'name']:
-                    if phi_type in text_lower:
-                        report['phi_redactions'][phi_type] = report['phi_redactions'].get(phi_type, 0) + count
-            
+
+            # Skip PHI ops — counted above from authoritative source
+            if 'redact' in text_lower or 'phi' in text_lower or 'phi summary' in text_lower:
+                continue
+
             # Type conversions
-            elif 'converted' in text_lower and 'date' in text_lower:
+            if 'converted' in text_lower and 'date' in text_lower:
                 count_match = re.search(r'(\d+)', text)
                 report['type_conversions']['date_columns'] += int(count_match.group(1)) if count_match else 1
             elif 'converted' in text_lower and ('numeric' in text_lower or 'number' in text_lower):
                 count_match = re.search(r'(\d+)', text)
                 report['type_conversions']['numeric_columns'] += int(count_match.group(1)) if count_match else 1
-            
+
             # Missing values
             elif 'missing' in text_lower or 'imput' in text_lower or 'filled' in text_lower:
                 count_match = re.search(r'(\d+)', text)
                 report['missing_values_handled'] += int(count_match.group(1)) if count_match else 0
-            
+
             # Duplicates
             elif 'duplicate' in text_lower:
                 count_match = re.search(r'(\d+)', text)
                 report['duplicates_removed'] += int(count_match.group(1)) if count_match else 0
-            
+
             # ICD-10 mappings
             elif 'fuzzy-matched' in text_lower or 'fuzzy-corrected' in text_lower:
                 count_match = re.search(r'(\d+)', text)
@@ -2145,7 +2387,7 @@ class DataCleaner:
             elif 'unrecognized' in text_lower:
                 count_match = re.search(r'(\d+)', text)
                 report['icd10_mappings']['unrecognized'] += int(count_match.group(1)) if count_match else 0
-            
+
             # Text corrections
             elif 'abbreviation' in text_lower or 'expanded' in text_lower:
                 count_match = re.search(r'(\d+)', text)
@@ -2153,27 +2395,34 @@ class DataCleaner:
             elif 'spell' in text_lower or 'misspelling' in text_lower or 'corrected' in text_lower:
                 count_match = re.search(r'(\d+)', text)
                 report['text_corrections']['misspellings_fixed'] += int(count_match.group(1)) if count_match else 0
-            
+
             # Outliers
-            elif 'clip' in text_lower or 'outlier' in text_lower:
+            elif 'clip' in text_lower or 'outlier' in text_lower or 'capped' in text_lower:
                 count_match = re.search(r'(\d+)', text)
                 report['outliers_clipped'] += int(count_match.group(1)) if count_match else 0
-            
+
             # Clinical validations
             elif 'clinical range' in text_lower:
                 count_match = re.search(r'(\d+)', text)
                 report['clinical_validations'] += int(count_match.group(1)) if count_match else 0
-        
-        # Add fuzzy matching availability status
+
         report['fuzzy_matching_available'] = THEFUZZ_AVAILABLE
-        
         return report
     
     # ──────────────────────────────────────────────
     # MAIN CLEAN DISPATCHER
     # ──────────────────────────────────────────────
     def clean(self, operations: dict, operation_sequence: list = None) -> dict:
-        """Execute cleaning operations, honoring user pipeline order when provided."""
+        """Execute cleaning operations, honoring user pipeline order when provided.
+
+        P0 FIX — Initialise _phi_verification so that generate_validation_report()
+        always finds it, even when redact_phi was not selected.
+        P1 FIX — Pipeline ordering: feature_engineering is now guarded to run
+        AFTER redact_phi when both are selected, preventing PHI-derived features
+        from leaking into engineered columns.
+        """
+        # Ensure PHI verification state is always present
+        self._phi_verification = None
         operation_handlers = {
             'smart_type_conversion': lambda cfg: self.smart_type_conversion(),
             'handle_missing': lambda cfg: self.handle_missing(cfg.get('method', 'auto')),
