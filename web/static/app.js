@@ -1239,7 +1239,7 @@ class SmartDataCleaner {
         container.innerHTML = `
             <div class="validation-grid">
                 <div class="validation-stat-card phi">
-                    <div class="stat-value">${phi.total || 0}</div>
+                    <div class="stat-value">${phi.phi_redacted || 0}</div>
                     <div class="stat-label">PHI Redacted</div>
                 </div>
                 <div class="validation-stat-card exact">

@@ -87,7 +87,7 @@ PHI_PATTERNS = {
         'risk_level': 'HIGH'
     },
     'DATE_FULL': {
-        'pattern': r'\b\d{1,2}[/\-]\d{1,2}[/\-]\d{4}\b',
+        'pattern': r'\b(?:\d{1,2}[/\-]\d{1,2}[/\-]\d{4}|\d{4}[/\-]\d{1,2}[/\-]\d{1,2})\b',
         'description': 'Full Date (potential DOB/admission)',
         'hipaa_category': 'Dates',
         'risk_level': 'MEDIUM'
@@ -509,18 +509,28 @@ class UnstructuredDataProcessor:
                 else:
                     doc = fitz.open(file_path)
 
-                text_parts = [page.get_text() for page in doc]
+                text_parts = []
+                has_tables = False
+                for page in doc:
+                    if page.find_tables().tables:
+                        has_tables = True
+                    text_parts.append(page.get_text(sort=True))
+                
                 num_pages = max(len(text_parts), 1)
                 doc.close()
                 full_text = '\n'.join(text_parts)
                 chars_per_page = len(full_text.strip()) / num_pages
 
-                # If density is good â†’ this is a text-layer PDF â†’ use it directly (fast)
-                if chars_per_page > 100:
+                if has_tables and DOCLING_AVAILABLE:
+                    self._log(f"PDF contains tables (density {chars_per_page:.0f}) — escalating to Docling for table-aware extraction")
+                    pass # Fall through to Docling
+                elif chars_per_page > 100:
                     self._log(f"PDF fast path via PyMuPDF ({chars_per_page:.0f} chars/page)")
                     return full_text
 
-                self._log(f"PDF text-sparse ({chars_per_page:.0f} chars/page) â€” escalating to Docling")
+                if not (has_tables and DOCLING_AVAILABLE):
+                    self._log(f"PDF text-sparse ({chars_per_page:.0f} chars/page) — escalating to Docling")
+
             except Exception as e:
                 self._log(f"PyMuPDF fast-path failed: {e}", "WARNING")
 
@@ -708,7 +718,14 @@ class UnstructuredDataProcessor:
 
         for phi_type, config in PHI_PATTERNS.items():
             for match in re.finditer(config['pattern'], text, re.IGNORECASE):
-                matched_text = match.group(0)
+                if match.lastindex:
+                    matched_text = match.group(match.lastindex)
+                    start_pos = match.start(match.lastindex)
+                    end_pos = match.end(match.lastindex)
+                else:
+                    matched_text = match.group(0)
+                    start_pos = match.start()
+                    end_pos = match.end()
 
                 if phi_type in ('SSN', 'AADHAAR', 'CREDIT_CARD'):
                     digits_only = re.sub(r'\D', '', matched_text)
@@ -722,10 +739,10 @@ class UnstructuredDataProcessor:
                     'description': config['description'],
                     'hipaa_category': config['hipaa_category'],
                     'risk_level': config['risk_level'],
-                    'start': match.start(),
-                    'end': match.end(),
+                    'start': start_pos,
+                    'end': end_pos,
                     'matched_text_preview': matched_text[:3] + '***',
-                    'line_number': text[:match.start()].count('\n') + 1
+                    'line_number': text[:start_pos].count('\n') + 1
                 })
 
         findings = self._resolve_overlapping_findings(findings)
@@ -882,7 +899,21 @@ class UnstructuredDataProcessor:
         # Final safety-net cleanup for masked SSNs that may bypass structured matching.
         redacted = re.sub(r'\*{3}-\*{2}-\d{4}\b', '[REDACTED-SSN]', redacted)
 
-        self._log(f"Redacted {redaction_report['redactions']} PHI items using '{redaction_style}' style")
+        # ── Mandatory post-redaction verification ──
+        # Re-scan the output. If ANY PHI remains, fail closed to guarantee privacy.
+        residual_findings = self.detect_phi(redacted)
+        redaction_report['residual_phi'] = len(residual_findings)
+        
+        if len(residual_findings) > 0:
+            redaction_report['verification'] = 'FAILED'
+            redaction_report['privacy_status'] = 'REVIEW_REQUIRED'
+            self._log(f"CRITICAL: Post-redaction verification FAILED. {len(residual_findings)} residual PHI items found. Failing closed.")
+            # Fail closed: scrub the text entirely to prevent leak
+            redacted = "[ERROR: Document locked. Post-redaction verification failed. Residual PHI detected.]"
+        else:
+            redaction_report['verification'] = 'PASSED'
+            redaction_report['privacy_status'] = 'CLEAN'
+            self._log(f"Redacted {redaction_report['redactions']} PHI items using '{redaction_style}' style. Verification: PASSED.")
 
         return redacted, redaction_report
 

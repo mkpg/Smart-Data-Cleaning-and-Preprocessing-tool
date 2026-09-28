@@ -873,19 +873,31 @@ class DataAnalyzer:
                 col_issues.append('potential date strings')
             
             # P1 FIX: Outliers — IQR 1.5× only for non-engineered numeric columns
-            if pd.api.types.is_numeric_dtype(col_data) and not column.endswith(_ENGINEERED_SUFFIXES):
-                Q1 = col_data.quantile(0.25)
-                Q3 = col_data.quantile(0.75)
-                IQR = Q3 - Q1
-                if IQR > 0:
-                    outliers = col_data[(col_data < (Q1 - 1.5 * IQR)) | (col_data > (Q3 + 1.5 * IQR))]
-                    if len(outliers) > 0:
-                        issues.append({
-                            'type': 'outliers',
-                            'icon': '❌',
-                            'column': column,
-                            'message': f'{len(outliers)} outliers (IQR method)'
-                        })
+            if not column.endswith(_ENGINEERED_SUFFIXES):
+                # Try converting to numeric to find outliers even if currently object/string type
+                if col_data.dtype == 'object':
+                    numeric_col = pd.to_numeric(col_data, errors='coerce')
+                    # Only proceed if it's actually mostly numeric (e.g., >50% non-null)
+                    if numeric_col.notna().sum() > len(numeric_col) * 0.5:
+                        check_col = numeric_col
+                    else:
+                        check_col = col_data
+                else:
+                    check_col = col_data
+                    
+                if pd.api.types.is_numeric_dtype(check_col):
+                    Q1 = check_col.quantile(0.25)
+                    Q3 = check_col.quantile(0.75)
+                    IQR = Q3 - Q1
+                    if IQR > 0:
+                        outliers = check_col[(check_col < (Q1 - 1.5 * IQR)) | (check_col > (Q3 + 1.5 * IQR))]
+                        if len(outliers) > 0:
+                            issues.append({
+                                'type': 'outliers',
+                                'icon': '❌',
+                                'column': column,
+                                'message': f'{len(outliers)} outliers (IQR method)'
+                            })
             
             if col_issues:
                 issues.append({
@@ -997,14 +1009,35 @@ class DataAnalyzer:
         outlier_count = 0
         total_numeric_values = 0
         
-        for col in self.data.select_dtypes(include=[np.number]).columns:
-            col_data = self.data[col].dropna()
-            if len(col_data) > 0:
+        _ENGINEERED_SUFFIXES = (
+            '_binned', '_log', '_encoded', '_length', '_word_count',
+            '_year', '_month', '_day', '_dayofweek', '_age', '_domain',
+        )
+        for col in self.data.columns:
+            if col.endswith(_ENGINEERED_SUFFIXES):
+                continue
+                
+            col_data = self.data[col]
+            if col_data.dtype == 'object':
+                numeric_col = pd.to_numeric(col_data, errors='coerce')
+                if numeric_col.notna().sum() > len(numeric_col) * 0.5:
+                    check_col = numeric_col.dropna()
+                else:
+                    continue
+            elif pd.api.types.is_numeric_dtype(col_data):
+                check_col = col_data.dropna()
+            else:
+                continue
+                
+            if len(check_col) > 0:
                 try:
-                    z_scores = np.abs((col_data - col_data.mean()) / col_data.std())
-                    outliers = (z_scores > 3).sum()
-                    outlier_count += outliers
-                    total_numeric_values += len(col_data)
+                    Q1 = check_col.quantile(0.25)
+                    Q3 = check_col.quantile(0.75)
+                    IQR = Q3 - Q1
+                    if IQR > 0:
+                        outliers = ((check_col < (Q1 - 1.5 * IQR)) | (check_col > (Q3 + 1.5 * IQR))).sum()
+                        outlier_count += outliers
+                    total_numeric_values += len(check_col)
                 except:
                     pass
         
@@ -1123,15 +1156,36 @@ class DataAnalyzer:
         outlier_count = 0
         outlier_cols = []
         
-        for col in self.data.select_dtypes(include=[np.number]).columns:
-            col_data = self.data[col].dropna()
-            if len(col_data) > 0:
+        _ENGINEERED_SUFFIXES = (
+            '_binned', '_log', '_encoded', '_length', '_word_count',
+            '_year', '_month', '_day', '_dayofweek', '_age', '_domain',
+        )
+        for col in self.data.columns:
+            if col.endswith(_ENGINEERED_SUFFIXES):
+                continue
+                
+            col_data = self.data[col]
+            if col_data.dtype == 'object':
+                numeric_col = pd.to_numeric(col_data, errors='coerce')
+                if numeric_col.notna().sum() > len(numeric_col) * 0.5:
+                    check_col = numeric_col.dropna()
+                else:
+                    continue
+            elif pd.api.types.is_numeric_dtype(col_data):
+                check_col = col_data.dropna()
+            else:
+                continue
+                
+            if len(check_col) > 0:
                 try:
-                    z_scores = np.abs((col_data - col_data.mean()) / col_data.std())
-                    col_outliers = (z_scores > 3).sum()
-                    if col_outliers > 0:
-                        outlier_count += col_outliers
-                        outlier_cols.append(col)
+                    Q1 = check_col.quantile(0.25)
+                    Q3 = check_col.quantile(0.75)
+                    IQR = Q3 - Q1
+                    if IQR > 0:
+                        col_outliers = ((check_col < (Q1 - 1.5 * IQR)) | (check_col > (Q3 + 1.5 * IQR))).sum()
+                        if col_outliers > 0:
+                            outlier_count += col_outliers
+                            outlier_cols.append(col)
                 except:
                     pass
         
