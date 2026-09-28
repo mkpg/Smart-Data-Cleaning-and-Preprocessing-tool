@@ -87,7 +87,7 @@ PHI_PATTERNS = {
         'risk_level': 'HIGH'
     },
     'DATE_FULL': {
-        'pattern': r'\b(?:\d{1,2}[/\-]\d{1,2}[/\-]\d{4}|\d{4}[/\-]\d{1,2}[/\-]\d{1,2})\b',
+        'pattern': r'\b(?:\d{4}[/\-]\d{1,2}[/\-]\d{1,2}|\d{1,2}[/\-]\d{1,2}[/\-]\d{4})\b',
         'description': 'Full Date (potential DOB/admission)',
         'hipaa_category': 'Dates',
         'risk_level': 'MEDIUM'
@@ -120,16 +120,16 @@ PHI_PATTERNS = {
         # P0 FIX: Extended to match abbreviated first names (e.g. 'S. Ibrahim', 'J. Smith')
         # and all common prefix forms ('Patient:', 'Name:', 'Pt:', 'Pt Name:', 'Patient Name:').
         'pattern': (
-            r'\b(?:Patient\s*Name|Patient|Pt\.?\s*Name|Pt\.?|Name)'
-            r'[:\s]+'
-            r'([A-Z][a-z]*\.?\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)'
+            r'\b(?:Patient\s*Name|Pt\.?\s*Name)\s*:\s*([A-Z][a-z]*\.?\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b|'
+            r'(?:^|\n)\s*Name\s*:\s*([A-Z][a-z]*\.?\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b|'
+            r'\b(?:Patient)\s*:\s*([A-Z][a-z]*\.?\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\b'
         ),
         'description': 'Patient Name',
         'hipaa_category': 'Names',
         'risk_level': 'HIGH'
     },
     'PROVIDER_NAME': {
-        'pattern': r'\b(?:Dr\.|Doctor|Physician|Attending|Provider)[:\s]*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)',
+        'pattern': r'\b(?:Dr\.|Doctor)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b|\b(?:Physician|Attending|Provider)\s*:\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\b',
         'description': 'Provider/Doctor Name',
         'hipaa_category': 'Names',
         'risk_level': 'MEDIUM'
@@ -451,8 +451,10 @@ class UnstructuredDataProcessor:
             metadata['extraction_method'] = 'direct_text_read'
 
         elif ext == '.pdf':
-            text = self._extract_pdf_text(file_path, file_obj)
-            metadata['extraction_method'] = 'docling+ocr' if DOCLING_AVAILABLE else 'pymupdf' if PYMUPDF_AVAILABLE else 'fallback'
+            text, pdf_meta = self._extract_pdf_text(file_path, file_obj)
+            metadata['extraction_method'] = pdf_meta.get('extraction_method', 'pymupdf')
+            if 'table_phi_hints' in pdf_meta:
+                metadata['table_phi_hints'] = pdf_meta['table_phi_hints']
 
         elif ext == '.rtf':
             text = self._read_text_file(file_path, file_obj)
@@ -492,7 +494,7 @@ class UnstructuredDataProcessor:
         with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
             return f.read()
 
-    def _extract_pdf_text(self, file_path: str = None, file_obj=None) -> str:
+    def _extract_pdf_text(self, file_path: str = None, file_obj=None) -> Tuple[str, dict]:
         """
         Smart router: check text density first, pick the right engine.
         Strategy 1 (fast path): PyMuPDF â€” if PDF has a text layer (>100 chars/page avg)
@@ -500,6 +502,7 @@ class UnstructuredDataProcessor:
         Strategy 3 (fallback): Tesseract OCR
         """
         # â”€â”€ Strategy 1: PyMuPDF fast path (text-layer PDFs) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        pdf_metadata = {'extraction_method': 'pymupdf', 'table_phi_hints': []}
         if PYMUPDF_AVAILABLE:
             try:
                 if file_obj:
@@ -512,9 +515,77 @@ class UnstructuredDataProcessor:
                 text_parts = []
                 has_tables = False
                 for page in doc:
-                    if page.find_tables().tables:
+                    tables = page.find_tables()
+                    table_bboxes = []
+                    markdown_tables = []
+                    
+                    if tables.tables:
                         has_tables = True
-                    text_parts.append(page.get_text(sort=True))
+                        for table in tables.tables:
+                            rows = table.extract()
+                            if not rows or len(rows) < 2 or len(rows[0]) < 2:
+                                continue
+                            
+                            table_bboxes.append(table.bbox)
+                            
+                            headers = [str(h).strip().lower() if h else "" for h in rows[0]]
+                            phi_columns = {}
+                            for i, header in enumerate(headers):
+                                tokens = header.replace('-', ' ').split()
+                                if "insurance" in header:
+                                    if "id" in tokens or "number" in header or "num" in tokens:
+                                        phi_columns[i] = "INSURANCE_ID"
+                                elif "name" in header or "patient" in header:
+                                    if not any(x in header for x in ["drug", "test", "diagnosis", "department", "insurance"]):
+                                        phi_columns[i] = "PATIENT_NAME"
+                                elif "mrn" in tokens or "record" in header:
+                                    phi_columns[i] = "MRN"
+                                elif "id" in tokens:
+                                    phi_columns[i] = "PATIENT_ID"
+                            
+                            # Build markdown table
+                            md = []
+                            for r_idx, row in enumerate(rows):
+                                clean_row = [str(c).replace('\n', ' ').strip() if c else "" for c in row]
+                                md.append("| " + " | ".join(clean_row) + " |")
+                                if r_idx == 0:
+                                    md.append("|" + "|".join(["---" for _ in clean_row]) + "|")
+                                
+                                if phi_columns and r_idx > 0:
+                                    for col_idx, phi_type in phi_columns.items():
+                                        if col_idx < len(row) and row[col_idx]:
+                                            val = str(row[col_idx]).strip()
+                                            if val and val.lower() not in ('none', 'null', 'n/a', '-'):
+                                                # Validation to avoid redacting random long sentences or headers
+                                                if len(val.split()) > 5:
+                                                    continue
+                                                pdf_metadata['table_phi_hints'].append({'type': phi_type, 'value': val})
+                                                
+                            markdown_tables.append("\n".join(md))
+
+                    # Get text excluding table regions to avoid duplicates/messy blocks
+                    blocks = page.get_text("blocks")
+                    blocks.sort(key=lambda b: (b[1], b[0]))
+                    page_text_parts = []
+                    for b in blocks:
+                        if len(b) < 5: continue
+                        bx0, by0, bx1, by1, btext = b[:5]
+                        cx, cy = (bx0 + bx1) / 2, (by0 + by1) / 2
+                        
+                        in_table = False
+                        for tx0, ty0, tx1, ty1 in table_bboxes:
+                            if tx0 <= cx <= tx1 and ty0 <= cy <= ty1:
+                                in_table = True
+                                break
+                        
+                        if not in_table:
+                            page_text_parts.append(btext)
+                    
+                    page_text = "\n".join(page_text_parts)
+                    if markdown_tables:
+                        page_text += "\n\n" + "\n\n".join(markdown_tables)
+                    
+                    text_parts.append(page_text)
                 
                 num_pages = max(len(text_parts), 1)
                 doc.close()
@@ -526,7 +597,7 @@ class UnstructuredDataProcessor:
                     pass # Fall through to Docling
                 elif chars_per_page > 100:
                     self._log(f"PDF fast path via PyMuPDF ({chars_per_page:.0f} chars/page)")
-                    return full_text
+                    return full_text, pdf_metadata
 
                 if not (has_tables and DOCLING_AVAILABLE):
                     self._log(f"PDF text-sparse ({chars_per_page:.0f} chars/page) — escalating to Docling")
@@ -561,7 +632,8 @@ class UnstructuredDataProcessor:
 
                 if text and text.strip():
                     self._log("PDF extracted via Docling (complex path)")
-                    return text
+                    pdf_metadata['extraction_method'] = 'docling'
+                    return text, pdf_metadata
             except Exception as e:
                 self._log(f"Docling extraction failed: {e}", "WARNING")
                 if file_obj and tmp_path:
@@ -572,10 +644,12 @@ class UnstructuredDataProcessor:
 
         # â”€â”€ Strategy 3: Tesseract OCR fallback â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         if TESSERACT_AVAILABLE:
-            return self._ocr_pdf(file_path, file_obj)
+            text = self._ocr_pdf(file_path, file_obj)
+            pdf_metadata['extraction_method'] = 'tesseract_ocr'
+            return text, pdf_metadata
 
         self._log("No PDF extraction library available.", "ERROR")
-        return "[PDF extraction failed: install PyMuPDF or docling]"
+        return "[PDF extraction failed: install PyMuPDF or docling]", pdf_metadata
 
     def _ocr_pdf(self, file_path: str = None, file_obj=None) -> str:
         """OCR-based PDF text extraction using Tesseract via PyMuPDF rendering."""
@@ -902,6 +976,19 @@ class UnstructuredDataProcessor:
         # ── Mandatory post-redaction verification ──
         # Re-scan the output. If ANY PHI remains, fail closed to guarantee privacy.
         residual_findings = self.detect_phi(redacted)
+        
+        # Additional verification: Ensure no exact matches of High/Critical PHI leaked
+        # (e.g., table-extracted names that regex wouldn't catch on a second pass)
+        for finding in findings:
+            if finding['type'] in ('PATIENT_NAME', 'MRN', 'SSN', 'PATIENT_ID', 'INSURANCE_ID', 'EMAIL', 'PHONE'):
+                original_val = text[finding['start']:finding['end']]
+                if len(original_val) > 4 and original_val in redacted:
+                    residual_findings.append({
+                        'type': finding['type'],
+                        'risk_level': finding['risk_level'],
+                        'description': 'Residual leaked value detected by exact match verification'
+                    })
+
         redaction_report['residual_phi'] = len(residual_findings)
         
         if len(residual_findings) > 0:
@@ -2431,6 +2518,28 @@ class UnstructuredDataProcessor:
 
             # Step 5: Detect PHI on the final analysis text
             phi_findings = self.detect_phi(analysis_text)
+            
+            # Augment with table hints
+            table_phi_hints = metadata.get('table_phi_hints', [])
+            if table_phi_hints:
+                for hint in table_phi_hints:
+                    val = hint['value']
+                    pattern = r'\b' + re.escape(val) + r'\b'
+                    for match in re.finditer(pattern, analysis_text):
+                        phi_findings.append({
+                            'type': hint['type'],
+                            'description': 'Table Cell PHI',
+                            'hipaa_category': 'Names/IDs',
+                            'risk_level': 'HIGH',
+                            'start': match.start(),
+                            'end': match.end(),
+                            'matched_text_preview': match.group(0)[:3] + '***',
+                            'line_number': analysis_text[:match.start()].count('\n') + 1
+                        })
+            # Resolve overlaps again
+            phi_findings = self._resolve_overlapping_findings(phi_findings)
+            self.phi_findings = phi_findings
+            
             result['phi_findings'] = phi_findings
             result['phi_summary'] = {
                 'total_found': len(phi_findings),

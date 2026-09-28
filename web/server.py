@@ -876,7 +876,9 @@ class DataAnalyzer:
             if not column.endswith(_ENGINEERED_SUFFIXES):
                 # Try converting to numeric to find outliers even if currently object/string type
                 if col_data.dtype == 'object':
-                    numeric_col = pd.to_numeric(col_data, errors='coerce')
+                    # Extract numeric part if possible to mimic smart_type_conversion
+                    extracted = col_data.astype(str).str.extract(r'([-+]?\d*\.?\d+)')[0]
+                    numeric_col = pd.to_numeric(extracted, errors='coerce')
                     # Only proceed if it's actually mostly numeric (e.g., >50% non-null)
                     if numeric_col.notna().sum() > len(numeric_col) * 0.5:
                         check_col = numeric_col
@@ -2609,12 +2611,24 @@ def execute_cleaning():
             processor = UnstructuredDataProcessor()
             result = processor.process_text(text=raw_text, filename=filename, options=operations)
             
+            # Post-redaction verification - fail closed
+            if operations.get('redact_phi', True):
+                validation = result.get('compliance_validation', {})
+                if validation and not validation.get('passed', True):
+                    issues = validation.get('issues', [])
+                    logger.error(f"Post-redaction verification failed. Residual PHI detected: {issues}")
+                    return jsonify({
+                        'error': 'Post-redaction verification failed. Residual PHI detected. Privacy status: REVIEW_REQUIRED.',
+                        'issues': issues
+                    }), 403
+
             unstructured_store[session_id].update({
                 'cleaned_text': result.get('cleaned_text', ''),
                 'phi_findings': result.get('phi_findings', []),
                 'clinical_values': result.get('clinical_values', {}),
                 'sections': result.get('sections', []),
-                'processed_at': datetime.now().isoformat()
+                'processed_at': datetime.now().isoformat(),
+                'compliance_validation': result.get('compliance_validation', {})
             })
             
             return jsonify({
