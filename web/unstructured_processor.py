@@ -718,7 +718,7 @@ class UnstructuredDataProcessor:
 
         for phi_type, config in PHI_PATTERNS.items():
             for match in re.finditer(config['pattern'], text, re.IGNORECASE):
-                if match.lastindex:
+                if match.lastindex is not None:
                     matched_text = match.group(match.lastindex)
                     start_pos = match.start(match.lastindex)
                     end_pos = match.end(match.lastindex)
